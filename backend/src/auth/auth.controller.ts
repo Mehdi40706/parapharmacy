@@ -18,6 +18,9 @@ import { RefreshDto } from './dto/refresh.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { GoogleAuthGuard } from './guards/google-auth.guard';
+import { FacebookAuthGuard } from './guards/facebook-auth.guard';
+import type { OAuthProfile } from './interfaces/oauth-profile.interface';
 
 @Controller('auth')
 export class AuthController {
@@ -35,6 +38,26 @@ export class AuthController {
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
+  }
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('google')
+  googleAuth() {}
+
+  @UseGuards(GoogleAuthGuard)
+  @Get('google/callback')
+  googleAuthCallback(@CurrentUser() profile: OAuthProfile) {
+    return this.authService.socialLogin(profile);
+  }
+
+  @UseGuards(FacebookAuthGuard)
+  @Get('facebook')
+  facebookAuth() {}
+
+  @UseGuards(FacebookAuthGuard)
+  @Get('facebook/callback')
+  facebookAuthCallback(@CurrentUser() profile: OAuthProfile) {
+    return this.authService.socialLogin(profile);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -76,7 +99,7 @@ export class AuthController {
   forgotPassword(@Body() dto: ForgotPasswordDto) {
     return this.authService.requestPasswordReset(dto.email);
   }
-
+  
   @Post('reset-password')
   resetPassword(@Body() dto: ResetPasswordDto) {
     return this.authService.resetPassword(dto.token, dto.newPassword);

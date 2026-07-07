@@ -1,20 +1,17 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
+import { ConfigService } from '../config/config.service';
 
 @Injectable()
 export class MailService {
   private transporter: nodemailer.Transporter;
   private readonly logger = new Logger(MailService.name);
 
-  constructor() {
-    const user = process.env.MAIL_USER;
-    const password = process.env.MAIL_PASSWORD;
+  constructor(private readonly configService: ConfigService) {
+    const user = this.configService.getMailUser();
+    const password = this.configService.getMailPassword();
 
-    const hasGmailConfig =
-      Boolean(user) &&
-      Boolean(password) &&
-      !user?.startsWith('votre_') &&
-      !password?.startsWith('votre_');
+    const hasGmailConfig = !user.startsWith('votre_') && !password.startsWith('votre_');
 
     if (!hasGmailConfig) {
       throw new Error(
@@ -34,8 +31,8 @@ export class MailService {
   }
 
   async sendPasswordResetEmail(to: string, resetToken: string) {
-    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}`;
-    const fromAddress = process.env.MAIL_FROM || process.env.MAIL_USER;
+    const resetUrl = `${this.configService.getFrontendUrl()}/reset-password?token=${resetToken}`;
+    const fromAddress = this.configService.getMailFrom();
 
     try {
       await this.transporter.sendMail({

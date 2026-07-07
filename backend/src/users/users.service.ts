@@ -14,6 +14,14 @@ export class UsersService {
     return this.prisma.user.findUnique({ where: { id } });
   }
 
+  async findByGoogleId(googleId: string) {
+    return this.prisma.user.findFirst({ where: { googleId } });
+  }
+
+  async findByFacebookId(facebookId: string) {
+    return this.prisma.user.findFirst({ where: { facebookId } });
+  }
+
   async create(data: {
     email: string;
     password: string;
@@ -34,10 +42,43 @@ export class UsersService {
       },
     });
   }
+
+  async createOAuthUser(data: {
+    email: string;
+    password: string;
+    firstName: string;
+    lastName: string;
+    googleId?: string;
+    facebookId?: string;
+  }) {
+    const existing = await this.findByEmail(data.email);
+    if (existing) {
+      throw new ConflictException('Cet email est déjà utilisé');
+    }
+
+    return this.prisma.user.create({
+      data,
+    });
+  }
+
+  async linkGoogleId(userId: string, googleId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { googleId },
+    });
+  }
+
+  async linkFacebookId(userId: string, facebookId: string) {
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { facebookId },
+    });
+  }
+
   async update(id: string, data: { firstName?: string; lastName?: string; phone?: string }) {
-  return this.prisma.user.update({
-    where: { id },
-    data,
-  });
-}
+    return this.prisma.user.update({
+      where: { id },
+      data,
+    });
+  }
 }

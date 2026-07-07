@@ -8,6 +8,9 @@ import { AuthModule } from './auth/auth.module';
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { MailModule } from './mail/mail.module';
+import { ConfigModule } from './config/config.module';
+import { CategoriesModule } from './categories/categories.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -21,6 +24,9 @@ import { MailModule } from './mail/mail.module';
     UsersModule,
     AuthModule,
     MailModule,
+    ConfigModule,
+    CategoriesModule,
+    ProductsModule,
   ],
   providers: [
     {

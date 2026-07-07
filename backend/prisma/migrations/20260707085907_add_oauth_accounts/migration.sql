@@ -1,0 +1,2 @@
+-- This migration is intentionally a no-op.
+-- OAuth columns are kept by the later add_oauth_accounts migration.

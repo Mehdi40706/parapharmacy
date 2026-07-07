@@ -7,6 +7,9 @@ import { DatabaseModule } from '../database/database.module';
 import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { MailModule } from 'src/mail/mail.module';
+import { ConfigService } from '../config/config.service';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { FacebookStrategy } from './strategies/facebook.strategy';
 
 @Module({
   imports: [
@@ -14,12 +17,15 @@ import { MailModule } from 'src/mail/mail.module';
     UsersModule,
     PassportModule,
     MailModule,
-    JwtModule.register({
-      secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '5m' },
+    JwtModule.registerAsync({
+      inject: [ConfigService],
+      useFactory: (configService: ConfigService) => ({
+        secret: configService.getJwtSecret(),
+        signOptions: { expiresIn: '5m' },
+      }),
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy, FacebookStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })
