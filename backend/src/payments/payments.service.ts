@@ -41,22 +41,24 @@ export class PaymentsService {
     const amountInMillimes = Math.round(Number(order.totalPrice) * 1000);
 
     try {
-      const { data } = await this.konnect.post('/payments/init-payment', {
-        receiverWalletId: process.env.KONNECT_WALLET_ID,
-        token: 'TND',
-        amount: amountInMillimes,
-        type: 'immediate',
-        description: `Commande #${order.id.slice(0, 8)} - Parapharmacie`,
-        acceptedPaymentMethods: ['wallet', 'bank_card', 'e-DINAR'],
-        lifespan: 30, // minutes avant expiration du lien de paiement
-        checkoutForm: true,
-        firstName: order.user.firstName,
-        lastName: order.user.lastName,
-        email: order.user.email,
-        orderId: order.id,
-        webhook: `${process.env.BACKEND_URL}/payments/webhook`,
-        silentWebhook: true, // le client n'est pas redirigé vers le webhook, c'est un call serveur
-      });
+     const { data } = await this.konnect.post('/payments/init-payment', {
+      receiverWalletId: process.env.KONNECT_WALLET_ID,
+      token: 'TND',
+      amount: amountInMillimes,
+      type: 'immediate',
+      description: `Commande #${order.id.slice(0, 8)} - Parapharmacie`,
+      acceptedPaymentMethods: ['wallet', 'bank_card', 'e-DINAR'],
+      lifespan: 30,
+      checkoutForm: true,
+      firstName: order.user.firstName,
+      lastName: order.user.lastName,
+      email: order.user.email,
+      orderId: order.id,
+      webhook: `${process.env.BACKEND_URL}/payments/webhook`,
+      silentWebhook: true,
+      successUrl: `${process.env.FRONTEND_URL}/checkout/success?order_id=${order.id}`,
+      failUrl: `${process.env.FRONTEND_URL}/checkout/cancel?order_id=${order.id}`,
+    }); 
 
       await this.prisma.order.update({
         where: { id: order.id },

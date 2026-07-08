@@ -1,0 +1,1 @@
+import{g as o,j as s,c as a,a as t,t as r,m as u,o as l}from"./BERYZ6li.js";const c=o({__name:"me",setup(m){const n=s();return(p,e)=>(l(),a("div",null,[e[0]||(e[0]=t("h1",null,"Mon Compte",-1)),t("p",null,"Bienvenue, "+r(u(n).user?.firstName)+"!",1)]))}});export{c as default};

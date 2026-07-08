@@ -1,0 +1,56 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-background text-ink font-sans antialiased;
+  }
+
+  h1, h2, h3, h4 {
+    @apply font-display;
+  }
+
+  /* Focus visible clair partout — accessibilité */
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    @apply outline-none ring-2 ring-sage ring-offset-2 ring-offset-background;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-sage text-white rounded-pill px-6 py-2.5 font-medium
+           hover:bg-sage-dark transition-colors duration-200
+           disabled:opacity-50 disabled:cursor-not-allowed;
+  }
+
+  .btn-secondary {
+    @apply bg-white text-sage border border-sage rounded-pill px-6 py-2.5 font-medium
+           hover:bg-mist transition-colors duration-200;
+  }
+
+  .input-field {
+    @apply w-full border border-mist bg-white rounded-xl px-4 py-2.5
+           text-ink placeholder:text-ink/40
+           focus:border-sage transition-colors duration-200;
+  }
+
+  .price {
+    font-variant-numeric: tabular-nums;
+    @apply font-semibold text-sage-dark;
+  }
+
+  .badge-pill {
+    @apply inline-flex items-center rounded-pill px-3 py-1 text-xs font-medium;
+  }
+}

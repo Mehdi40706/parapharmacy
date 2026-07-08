@@ -101,7 +101,7 @@
         "./imports"
       ],
       "#app-manifest": [
-        "./manifest/meta/8b7fa16c-7f0e-4454-b1b7-2372b72c44a8.json"
+        "./manifest/meta/dev.json"
       ],
       "#components": [
         "./components"
@@ -155,10 +155,13 @@
     "../layers/*/shared/**/*.d.ts",
     "../*.d.ts",
     "../layers/*/*.d.ts"
-  ],
+, "../../backend/dist/auth"  ],
   "exclude": [
     "../node_modules",
+    "../../node_modules",
     "../node_modules/nuxt/node_modules",
+    "../node_modules/@nuxtjs/tailwindcss/node_modules",
+    "../node_modules/@pinia/nuxt/node_modules",
     "../node_modules/@nuxt/devtools/node_modules",
     "../node_modules/@nuxt/telemetry/node_modules",
     "../dist",
@@ -176,7 +179,12 @@
     "../node_modules/dist/runtime/server",
     "../node_modules/*.*",
     "../node_modules/dist/*.*",
-    "../.output",
+    "dev",
     "../server"
-  ]
+  ],
+  "vueCompilerOptions": {
+    "plugins": [
+      "vue-router/volar/sfc-route-blocks"
+    ]
+  }
 }
