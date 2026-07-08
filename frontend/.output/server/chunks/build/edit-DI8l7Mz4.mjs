@@ -1,0 +1,94 @@
+import { _ as __nuxt_component_0 } from './nuxt-link-CBZ25J1v.mjs';
+import { defineComponent, ref, resolveComponent, mergeProps, withCtx, createTextVNode, unref, useSSRContext } from 'vue';
+import { ssrRenderAttrs, ssrRenderComponent } from 'vue/server-renderer';
+import { b as useRoute, a as useRouter } from './server.mjs';
+import { u as useApi } from './useApi-BHrVqC1i.mjs';
+import { u as useAdminProducts } from './useAdminProducts-D3GZdgBR.mjs';
+import '../_/nitro.mjs';
+import 'node:http';
+import 'node:https';
+import 'node:events';
+import 'node:buffer';
+import 'node:fs';
+import 'node:path';
+import 'node:crypto';
+import 'node:url';
+import '../routes/renderer.mjs';
+import 'vue-bundle-renderer/runtime';
+import 'unhead/server';
+import 'devalue';
+import 'unhead/utils';
+import 'pinia';
+import 'vue-router';
+import '@vue/shared';
+import './auth.store-BJcHULJo.mjs';
+
+const _sfc_main = /* @__PURE__ */ defineComponent({
+  __name: "edit",
+  __ssrInlineRender: true,
+  setup(__props) {
+    const route = useRoute();
+    const router = useRouter();
+    useApi();
+    const { updateProduct } = useAdminProducts();
+    const product = ref(null);
+    const loading = ref(false);
+    const isLoading = ref(true);
+    const errorMessage = ref("");
+    const handleSubmit = async (payload) => {
+      loading.value = true;
+      errorMessage.value = "";
+      try {
+        await updateProduct(route.params.id, payload);
+        router.push("/admin/produits");
+      } catch (error) {
+        errorMessage.value = error?.data?.message || "Erreur lors de la modification";
+      } finally {
+        loading.value = false;
+      }
+    };
+    return (_ctx, _push, _parent, _attrs) => {
+      const _component_NuxtLink = __nuxt_component_0;
+      const _component_ProductForm = resolveComponent("ProductForm");
+      _push(`<div${ssrRenderAttrs(mergeProps({ class: "mx-auto max-w-4xl space-y-5" }, _attrs))}><div class="flex flex-wrap items-center justify-between gap-3"><div><p class="text-sm font-semibold uppercase tracking-[0.25em] text-sage">Administration</p><h1 class="mt-1 text-2xl font-semibold text-ink">Modifier le produit</h1></div>`);
+      _push(ssrRenderComponent(_component_NuxtLink, {
+        to: "/admin/produits",
+        class: "text-sm font-medium text-sage transition hover:text-sage-dark"
+      }, {
+        default: withCtx((_, _push2, _parent2, _scopeId) => {
+          if (_push2) {
+            _push2(` ← Retour à la liste `);
+          } else {
+            return [
+              createTextVNode(" ← Retour à la liste ")
+            ];
+          }
+        }),
+        _: 1
+      }, _parent));
+      _push(`</div>`);
+      if (unref(isLoading)) {
+        _push(`<div class="rounded-[2rem] border border-mist bg-white p-6 shadow-sm"><div class="animate-pulse space-y-3"><div class="h-4 w-28 rounded bg-mist"></div><div class="h-10 rounded-xl bg-mist"></div><div class="h-24 rounded-xl bg-mist"></div><div class="h-10 rounded-xl bg-mist"></div></div></div>`);
+      } else if (unref(product)) {
+        _push(ssrRenderComponent(_component_ProductForm, {
+          initial: unref(product),
+          onSubmit: handleSubmit,
+          loading: unref(loading),
+          error: unref(errorMessage)
+        }, null, _parent));
+      } else {
+        _push(`<div class="rounded-[2rem] border border-dashed border-mist bg-white p-6 text-sm text-ink/70"> Impossible de charger ce produit pour le moment. </div>`);
+      }
+      _push(`</div>`);
+    };
+  }
+});
+const _sfc_setup = _sfc_main.setup;
+_sfc_main.setup = (props, ctx) => {
+  const ssrContext = useSSRContext();
+  (ssrContext.modules || (ssrContext.modules = /* @__PURE__ */ new Set())).add("pages/admin/produits/[id]/edit.vue");
+  return _sfc_setup ? _sfc_setup(props, ctx) : void 0;
+};
+
+export { _sfc_main as default };
+//# sourceMappingURL=edit-DI8l7Mz4.mjs.map

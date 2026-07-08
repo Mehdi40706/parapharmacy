@@ -31,11 +31,16 @@ export { requestIdleCallback, cancelIdleCallback } from '#app/compat/idle-callba
 export { setInterval } from '#app/compat/interval';
 export { definePageMeta, PageMeta } from '#app/composables/pages';
 export { defineLazyHydrationComponent } from '#app/composables/lazy-hydration';
+export { useAdminCategories } from '../app/composables/useAdminCategories';
+export { useAdminOrders } from '../app/composables/useAdminOrders';
+export { useAdminProducts, ProductPayload } from '../app/composables/useAdminProducts';
+export { useAdminUsers } from '../app/composables/useAdminUsers';
 export { useApi } from '../app/composables/useApi';
 export { useCategories } from '../app/composables/useCategories';
 export { useOrders, CreateOrderPayload } from '../app/composables/useOrders';
 export { usePayments } from '../app/composables/usePayments';
 export { useProducts, ProductQuery } from '../app/composables/useProducts';
+export { useStorage } from '../app/composables/useStorage';
 export { useAuthStore } from '../app/stores/auth.store';
 export { useCartStore, CartItem } from '../app/stores/cart.store';
 export { defineStore, acceptHMRUpdate, usePinia, storeToRefs } from '../node_modules/@pinia/nuxt/dist/runtime/composables';

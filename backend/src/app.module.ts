@@ -4,15 +4,16 @@ import { AppService } from './app.service';
 import { DatabaseModule } from './database/database.module';
 import { UsersModule } from './users/users.module';
 import { AuthModule } from './auth/auth.module';
-
 import { ThrottlerModule, ThrottlerGuard } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
 import { MailModule } from './mail/mail.module';
-import { ConfigModule } from './config/config.module';
+import { Config } from './config/config.module';
 import { CategoriesModule } from './categories/categories.module';
 import { ProductsModule } from './products/products.module';
 import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
+import { StorageModule } from './storage/storage.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -26,11 +27,14 @@ import { PaymentsModule } from './payments/payments.module';
     UsersModule,
     AuthModule,
     MailModule,
-    ConfigModule,
+    Config,
     CategoriesModule,
     ProductsModule,
     OrdersModule,
-    PaymentsModule,
+    PaymentsModule,   
+    ConfigModule.forRoot({
+      isGlobal: true,
+    }), StorageModule,
   ],
   providers: [
     {

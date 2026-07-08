@@ -81,4 +81,50 @@ export class UsersService {
       data,
     });
   }
+
+  async findAll(query: { page?: number; limit?: number; search?: string }) {
+  const { page = 1, limit = 20, search } = query;
+
+  const where = search
+    ? {
+        OR: [
+          { email: { contains: search, mode: 'insensitive' as const } },
+          { firstName: { contains: search, mode: 'insensitive' as const } },
+          { lastName: { contains: search, mode: 'insensitive' as const } },
+        ],
+      }
+    : {};
+
+  const [items, total] = await Promise.all([
+    this.prisma.user.findMany({
+      where,
+      select: {
+        id: true,
+        email: true,
+        firstName: true,
+        lastName: true,
+        phone: true,
+        role: true,
+        createdAt: true,
+      },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    this.prisma.user.count({ where }),
+  ]);
+
+  return {
+    data: items,
+    meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+  };
+}
+
+async updateRole(id: string, role: 'CLIENT' | 'ADMIN') {
+  return this.prisma.user.update({
+    where: { id },
+    data: { role },
+    select: { id: true, email: true, role: true },
+  });
+}
 }

@@ -59,9 +59,16 @@ const errorMessage = ref('');
 const handleLogin = async () => {
   loading.value = true;
   errorMessage.value = '';
+
   try {
     await authStore.login(form.email, form.password);
-    router.push('/');
+
+    // Redirection selon le rôle
+    if (authStore.isAdmin) {
+      router.push('/admin');
+    } else {
+      router.push('/');
+    }
   } catch (error: any) {
     errorMessage.value = error?.data?.message || 'Email ou mot de passe incorrect';
   } finally {

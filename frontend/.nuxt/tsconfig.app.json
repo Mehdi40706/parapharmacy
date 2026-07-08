@@ -155,7 +155,7 @@
     "../layers/*/shared/**/*.d.ts",
     "../*.d.ts",
     "../layers/*/*.d.ts"
-, "../../backend/dist/auth"  ],
+  ],
   "exclude": [
     "../node_modules",
     "../../node_modules",

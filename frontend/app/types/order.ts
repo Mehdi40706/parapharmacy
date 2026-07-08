@@ -19,3 +19,12 @@ export interface Order {
   items: OrderItem[];
   createdAt: string;
 }
+
+export interface PaginatedResponse<T> {
+  data: T[];
+  meta: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  }}

@@ -16,6 +16,8 @@
     "@vue/runtime-dom": "3.5.39",
     "@vue/server-renderer": "3.5.39",
     "@vue/shared": "3.5.39",
+    "@vueuse/core": "14.3.0",
+    "@vueuse/shared": "14.3.0",
     "birpc": "2.9.0",
     "devalue": "5.8.1",
     "entities": "7.0.1",
