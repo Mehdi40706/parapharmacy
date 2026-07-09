@@ -3,6 +3,7 @@ import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { FindUsersDto } from './dto/find-user.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard)
 @Roles('ADMIN')
@@ -10,10 +11,10 @@ import { Roles } from '../auth/decorators/roles.decorator';
 export class UsersController {
   constructor(private usersService: UsersService) {}
 
-  @Get()
-  findAll(@Query() query: { page?: number; limit?: number; search?: string }) {
-    return this.usersService.findAll(query);
-  }
+@Get()
+findAll(@Query() query: FindUsersDto) {
+  return this.usersService.findAll(query);
+}
 
   @Patch(':id/role')
   updateRole(@Param('id') id: string, @Body('role') role: 'CLIENT' | 'ADMIN') {

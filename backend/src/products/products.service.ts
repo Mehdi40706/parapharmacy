@@ -120,6 +120,7 @@ export class ProductsService {
         stock: dto.stock ?? 0,
         imageUrl: dto.imageUrl,
         categoryId: dto.categoryId,
+        usageInstructions: dto.usageInstructions
       },
       include: { category: true },
     });

@@ -67,7 +67,7 @@ const handleLogin = async () => {
     if (authStore.isAdmin) {
       router.push('/admin');
     } else {
-      router.push('/');
+      router.push('/produits');
     }
   } catch (error: any) {
     errorMessage.value = error?.data?.message || 'Email ou mot de passe incorrect';

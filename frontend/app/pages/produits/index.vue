@@ -4,9 +4,9 @@
       <h1 class="text-3xl font-semibold mb-2">Nos produits</h1>
       <p class="text-ink/60">{{ pagination?.total || 0 }} produits disponibles</p>
     </div>
-
+    
     <div class="flex flex-col lg:flex-row gap-6">
-      <!-- Filtres -->
+        <!-- Filtres -->
       <aside class="lg:w-64 flex-shrink-0">
         <div class="bg-white rounded-2xl border border-mist p-5 lg:sticky lg:top-24">
           <h2 class="font-medium mb-4">Filtrer</h2>
@@ -57,9 +57,14 @@
           <p class="text-ink/60">Aucun produit ne correspond à votre recherche.</p>
         </div>
 
-        <div v-else class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
-          <ProductCard v-for="product in products" :key="product.id" :product="product" />
-        </div>
+      <div v-else class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+        <ProductCard
+          v-for="product in products"
+          :key="product.id"
+          :product="product"
+          @quick-view="selectedProduct = $event"
+        />
+      </div>
 
         <!-- Pagination -->
         <div v-if="pagination && pagination.totalPages > 1" class="flex justify-center gap-2 mt-8">
@@ -75,6 +80,7 @@
         </div>
       </div>
     </div>
+      <ProductQuickViewModal :product="selectedProduct" @close="selectedProduct = null" />
   </div>
 </template>
 
@@ -141,4 +147,6 @@ onMounted(async () => {
   categories.value = await fetchCategories();
   await fetchData();
 });
+const selectedProduct = ref<Product | null>(null);
+
 </script>

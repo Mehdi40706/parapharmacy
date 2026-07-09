@@ -16,6 +16,11 @@
         <textarea v-model="form.description" required rows="4" minlength="10" class="input-field" placeholder="Décrivez les bénéfices et l’utilisation du produit" />
       </div>
 
+      <div class="lg:col-span-2">
+        <label class="mb-1.5 block text-sm font-medium text-ink">instructions d'usage</label>
+        <textarea v-model="form.usageInstructions" required rows="4" minlength="10" class="input-field" placeholder="Décrivez comment utiliser le produit" />
+      </div>
+
       <div>
         <label class="mb-1.5 block text-sm font-medium text-ink">Prix (TND)</label>
         <input v-model.number="form.price" type="number" step="0.01" min="0" required class="input-field" />
@@ -96,6 +101,7 @@ const uploadError = ref('');
 const form = reactive({
   name: props.initial?.name || '',
   description: props.initial?.description || '',
+  usageInstructions: props.initial?.usageInstructions || '',
   price: props.initial?.price || 0,
   stock: props.initial?.stock || 0,
   categoryId: props.initial?.categoryId || props.initial?.category?.id || '',

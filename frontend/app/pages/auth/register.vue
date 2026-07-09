@@ -65,7 +65,7 @@ const handleRegister = async () => {
   errorMessage.value = '';
   try {
     await authStore.register(form);
-    router.push('/');
+    router.push('/produits');
   } catch (error: any) {
     errorMessage.value = error?.data?.message || "Une erreur est survenue lors de l'inscription";
   } finally {

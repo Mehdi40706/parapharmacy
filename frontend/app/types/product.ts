@@ -15,7 +15,10 @@ export interface Product {
   category: Category;
   categoryId: string;
   createdAt: string;
+  usageInstructions: string | null;
+  tags: string[];
 }
+
 
 export interface PaginatedResponse<T> {
   data: T[];

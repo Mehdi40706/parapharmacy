@@ -7,6 +7,7 @@ import {
   MinLength,
   IsPositive,
   IsInt,
+  IsArray,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -32,8 +33,20 @@ export class CreateProductDto {
 
   @IsOptional()
   @IsString()
+  usageInstructions?: string;
+
+  @IsOptional()
+  @IsArray()
+  @IsString({ each: true })
+  tags?: string[];
+
+
+  @IsOptional()
+  @IsString()
   imageUrl?: string;
 
   @IsUUID()
   categoryId!: string;
+
+
 }
