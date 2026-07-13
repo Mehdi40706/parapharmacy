@@ -69,6 +69,7 @@ model Product {
   description       String
   price             Decimal
   stock             Int         @default(0)
+  isActive          Boolean     @default(true)
   imageUrl          String?
   usageInstructions String?     
   category          Category    @relation(fields: [categoryId], references: [id])

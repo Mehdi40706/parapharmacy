@@ -31,15 +31,24 @@
             class="flex items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium transition"
             :class="isActive(item.to) ? 'bg-white/15 text-white shadow-sm' : 'text-slate-300 hover:bg-white/10 hover:text-white'"
           >
-            <span class="text-base">{{ item.icon }}</span>
-            <span>{{ item.label }}</span>
+          <Icon
+            :name="item.icon"
+            class="w-5 h-5"
+          />            
+          <span>{{ item.label }}</span>
           </NuxtLink>
         </nav>
+        <div class="border-t border-white/10 pt-4">
+  <button
+    @click="handleLogout"
+    class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
+  >
+    <Icon name="lucide:log-out" class="w-5 h-5" />
+    <span>Logout</span>
+  </button>
+</div>
 
-        <div class="mt-6 rounded-2xl border border-white/10 bg-white/10 p-4 text-sm text-slate-300">
-          <p class="font-medium text-white">Mode gestion</p>
-          <p class="mt-1">Gérez produits, commandes et utilisateurs depuis un tableau de bord moderne.</p>
-        </div>
+   
       </aside>
 
       <div class="flex-1">
@@ -55,10 +64,6 @@
               </div>
             </div>
 
-            <div class="hidden items-center gap-3 rounded-full border border-mist bg-white px-4 py-2 text-sm text-slate-600 shadow-sm sm:flex">
-              <span class="h-2.5 w-2.5 rounded-full bg-emerald-500" />
-              <span>En ligne</span>
-            </div>
           </div>
         </header>
 
@@ -73,18 +78,29 @@
 <script setup lang="ts">
 import { ref, watch } from 'vue';
 
+
 const route = useRoute();
 const menuOpen = ref(false);
 
 const navItems = [
-  { label: 'Dashboard', to: '/admin', icon: '⌂' },
-  { label: 'Produits', to: '/admin/produits', icon: '🧴' },
-  { label: 'Catégories', to: '/admin/categories', icon: '🗂️' },
-  { label: 'Commandes', to: '/admin/commandes', icon: '🛒' },
-  { label: 'Utilisateurs', to: '/admin/utilisateurs', icon: '👤' },
-];
+  { label: 'Dashboard', to: '/admin', icon: 'lucide:layout-dashboard' },
+  { label: 'Produits', to: '/admin/produits', icon: 'lucide:package' },
+  { label: 'Catégories', to: '/admin/categories', icon: 'lucide:folder-tree' },
+  { label: 'Commandes', to: '/admin/commandes', icon: 'lucide:shopping-cart' },
+  { label: 'Clients', to: '/admin/utilisateurs', icon: 'lucide:user' },
+]
+;
 
 const isActive = (path: string) => route.path === path || (path !== '/admin' && route.path.startsWith(path));
+const authStore = useAuthStore();
+const router = useRouter();
+const mobileMenuOpen = ref(false);
+
+const handleLogout = () => {
+  authStore.logout();
+  mobileMenuOpen.value = false;
+  router.push('/auth/login');
+};
 
 watch(() => route.path, () => {
   menuOpen.value = false;

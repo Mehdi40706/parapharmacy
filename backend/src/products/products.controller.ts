@@ -27,6 +27,13 @@ export class ProductsController {
     return this.productsService.findAll(query);
   }
 
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Get('admin/all')
+  findAllAdmin(@Query() query: QueryProductDto) {
+    return this.productsService.findAllAdmin(query);
+  }
+
   @Get('slug/:slug')
   findBySlug(@Param('slug') slug: string) {
     return this.productsService.findBySlug(slug);
@@ -53,8 +60,23 @@ export class ProductsController {
 
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles(Role.ADMIN)
+  @Patch(':id/archive')
+  archive(@Param('id') id: string) {
+    return this.productsService.archive(id);
+  }
+
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
+  @Patch(':id/restore')
+  restore(@Param('id') id: string) {
+    return this.productsService.restore(id);
+  }
+
+  @UseGuards(JwtAuthGuard, RolesGuard)
+  @Roles(Role.ADMIN)
   @Delete(':id')
   remove(@Param('id') id: string) {
     return this.productsService.remove(id);
   }
-}
+  }

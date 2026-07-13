@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsUUID, IsIn, Min, IsInt } from 'class-validator';
+import { IsOptional, IsString, IsUUID, IsIn, Min, IsInt, IsBoolean } from 'class-validator';
 import { Type } from 'class-transformer';
 
 export class QueryProductDto {
@@ -21,6 +21,10 @@ export class QueryProductDto {
   @IsInt()
   @Min(0)
   maxPrice?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 
   @IsOptional()
   @IsIn(['price', 'name', 'createdAt'])

@@ -73,7 +73,7 @@ export class StorageController {
     @Param('objectName')
     objectName: string,
   ) {
-    return this.storageService.getPresignedUrl(
+    return this.storageService.getPublicUrl(
       objectName,
     );
   }

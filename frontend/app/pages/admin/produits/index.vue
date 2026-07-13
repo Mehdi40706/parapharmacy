@@ -13,6 +13,7 @@
             <th class="p-4">Catégorie</th>
             <th class="p-4">Prix</th>
             <th class="p-4">Stock</th>
+            <th class="p-4">Statut</th>
             <th class="p-4"></th>
           </tr>
         </thead>
@@ -26,12 +27,30 @@
                 {{ product.stock }}
               </span>
             </td>
+            <td class="p-4">
+              <span v-if="!product.isActive" class="badge-pill bg-clay/10 text-clay text-xs">
+                Archivé
+              </span>
+              <span v-else class="badge-pill bg-sage/10 text-sage-dark text-xs">
+                Actif
+              </span>
+            </td>
             <td class="p-4 text-right">
               <NuxtLink :to="`/admin/produits/${product.id}/edit`" class="text-sage hover:underline mr-3">
                 Modifier
               </NuxtLink>
-              <button @click="handleDelete(product.id)" class="text-clay hover:underline">
+              <button @click="handleDelete(product.id)" class="text-clay hover:underline mr-3">
                 Supprimer
+              </button>
+              <button
+                v-if="product.isActive"
+                @click="handleArchive(product.id)"
+                class="text-clay hover:underline"
+              >
+                Archiver
+              </button>
+              <button v-else @click="handleRestore(product.id)" class="text-sage hover:underline">
+                Réactiver
               </button>
             </td>
           </tr>
@@ -58,15 +77,15 @@ definePageMeta({ layout: 'admin', middleware: 'admin' });
 
 import type { Product } from '~/types/product';
 
-const { fetchProducts } = useProducts();
-const { deleteProduct } = useAdminProducts();
+const { fetchAllProducts } = useProducts();
+const { deleteProduct, archiveProduct, restoreProduct } = useAdminProducts();
 
 const products = ref<Product[]>([]);
 const pagination = ref<any>(null);
 const currentPage = ref(1);
 
 const load = async () => {
-  const result = await fetchProducts({ page: currentPage.value, limit: 10 });
+  const result = await fetchAllProducts({ page: currentPage.value, limit: 10 });
   products.value = result.data;
   pagination.value = result.meta;
 };
@@ -79,6 +98,16 @@ const goToPage = (page: number) => {
 const handleDelete = async (id: string) => {
   if (!confirm('Supprimer ce produit ?')) return;
   await deleteProduct(id);
+  await load();
+};
+
+const handleArchive = async (id: string) => {
+  await archiveProduct(id);
+  await load();
+};
+
+const handleRestore = async (id: string) => {
+  await restoreProduct(id);
   await load();
 };
 

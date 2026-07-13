@@ -34,6 +34,8 @@
 </template>
 
 <script setup lang="ts">
+import ProductForm from '../../ProductForm.vue';
+
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
 const route = useRoute();

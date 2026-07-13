@@ -4,7 +4,7 @@ import { Profile, Strategy } from 'passport-facebook';
 import { ConfigService } from '../../config/config.service';
 import { OAuthProfile } from '../interfaces/oauth-profile.interface';
 
-@Injectable()
+/*@Injectable()
 export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
   constructor(configService: ConfigService) {
     super({
@@ -36,4 +36,4 @@ export class FacebookStrategy extends PassportStrategy(Strategy, 'facebook') {
       avatarUrl: profile.photos?.[0]?.value,
     };
   }
-}
+}*/

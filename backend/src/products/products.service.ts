@@ -23,6 +23,8 @@ export class ProductsService {
       .replace(/(^-|-$)/g, '');
   }
 
+
+
   async findAll(query: QueryProductDto) {
     const {
       search,
@@ -36,6 +38,7 @@ export class ProductsService {
     } = query;
 
     const where: Prisma.ProductWhereInput = {
+      isActive: true, 
       ...(search && {
         OR: [
           { name: { contains: search, mode: 'insensitive' } },
@@ -72,6 +75,35 @@ export class ProductsService {
       },
     };
   }
+
+async findAllAdmin(query: QueryProductDto) {
+  const { search, categoryId, page = 1, limit = 20 } = query;
+
+  const where: Prisma.ProductWhereInput = {
+    ...(search && {
+      OR: [
+        { name: { contains: search, mode: 'insensitive' } },
+        { description: { contains: search, mode: 'insensitive' } },
+      ],
+    }),
+    ...(categoryId && { categoryId }),
+  };
+
+  const [items, total] = await Promise.all([
+    this.prisma.product.findMany({
+      where,
+      include: { category: true },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    this.prisma.product.count({ where }),
+  ]);
+
+  return { data: items, meta: { total, page, limit, totalPages: Math.ceil(total / limit) } };
+}
+
+
 
   async findOne(id: string) {
     const product = await this.prisma.product.findUnique({
@@ -137,13 +169,10 @@ export class ProductsService {
         throw new BadRequestException('Catégorie invalide');
       }
     }
-
     const data: Prisma.ProductUpdateInput = { ...dto } as Prisma.ProductUpdateInput;
-
     if (dto.name) {
       data.slug = this.slugify(dto.name);
     }
-
     return this.prisma.product.update({
       where: { id },
       data,
@@ -151,10 +180,37 @@ export class ProductsService {
     });
   }
 
-  async remove(id: string) {
+  async archive(id: string) {
+    return this.prisma.product.update({
+      where: { id },
+      data: { isActive: false },
+      include: { category: true },
+    });
+  }
+  
+  async restore(id: string) {
     await this.findOne(id);
+    return this.prisma.product.update({
+      where: { id },
+      data: { isActive: true },
+      include: { category: true },
+    });
+  }
+  
+  async remove(id: string) {
+    // Vérifie si le produit a déjà été commandé
+    const orderItemsCount = await this.prisma.orderItem.count({
+      where: { productId: id },
+    });
+
+    if (orderItemsCount > 0) {
+       throw new ConflictException(
+        'Impossible de supprimer ce produit car il fait partie de commandes existantes.',
+      )
+    }
     return this.prisma.product.delete({ where: { id } });
   }
+
 
   async decrementStock(productId: string, quantity: number) {
     const product = await this.findOne(productId);

@@ -21,5 +21,11 @@ export const useAdminProducts = () => {
   const deleteProduct = (id: string) =>
     api(`/products/${id}`, { method: 'DELETE' });
 
-  return { createProduct, updateProduct, deleteProduct };
+  const archiveProduct = (id: string) =>
+    api(`/products/${id}/archive`, { method: 'PATCH' });
+
+  const restoreProduct = (id: string) =>
+    api(`/products/${id}/restore`, { method: 'PATCH' });
+
+  return { createProduct, updateProduct, deleteProduct, archiveProduct, restoreProduct };
 };

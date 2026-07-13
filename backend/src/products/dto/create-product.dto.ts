@@ -8,6 +8,7 @@ import {
   IsPositive,
   IsInt,
   IsArray,
+  IsBoolean,
 } from 'class-validator';
 import { Type } from 'class-transformer';
 
@@ -30,6 +31,10 @@ export class CreateProductDto {
   @Min(0)
   @IsOptional()
   stock?: number;
+
+  @IsOptional()
+  @IsBoolean()
+  isActive?: boolean;
 
   @IsOptional()
   @IsString()

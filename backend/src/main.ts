@@ -12,7 +12,15 @@ async function bootstrap() {
       transform: true,
     }),
   );
-  app.enableCors(); 
-  await app.listen(5000);
+app.enableCors({
+  // In docker/ngrok dev flows we allow the origin to be reflected so preflight
+  // responses include Access-Control-Allow-Origin. For production tighten this.
+  origin: true,
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+  allowedHeaders: 'Content-Type, Accept, Authorization',
+  credentials: true,
+});
+
+await app.listen(5000);
 }
 bootstrap();

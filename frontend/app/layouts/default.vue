@@ -1,16 +1,13 @@
 <template>
   <div class="min-h-screen flex flex-col bg-background">
     <header class="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-mist">
-      <nav class="max-w-6xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <nav class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
         <NuxtLink to="/" class="font-display text-xl font-semibold text-sage-dark">
           Parapharmacie
         </NuxtLink>
-
         <!-- Nav desktop -->
-         
         <div class="hidden md:flex items-center gap-12 text-sm font-medium">
           <template v-if="authStore.isAuthenticated">
-
           <NuxtLink to="/panier" class="relative hover:text-sage transition-colors">
             <Icon
               name="heroicons:shopping-cart"
@@ -23,8 +20,6 @@
               {{ cartStore.itemCount }}
             </span>
           </NuxtLink>
-
-
           <div
             ref="userMenu"
             class="relative"
@@ -38,17 +33,14 @@
               >
                 {{ authStore.user?.firstName?.charAt(0).toUpperCase() }}
               </div>
-
               <span class="hidden lg:block">
                 {{ authStore.user?.firstName }}
               </span>
-
               <Icon
                 name="heroicons:chevron-down"
                 class="w-4 h-4"
               />
             </button>
-
             <Transition
               enter-active-class="transition duration-150"
               enter-from-class="opacity-0 scale-95"
@@ -61,18 +53,15 @@
                 v-if="userMenuOpen"
                 class="absolute right-0 mt-3 w-64 rounded-xl border border-mist bg-white shadow-xl overflow-hidden z-50"
               >
-
                 <div class="px-4 py-4 border-b">
                   <p class="font-semibold">
                     {{ authStore.user?.firstName }}
                     {{ authStore.user?.lastName }}
                   </p>
-
                   <p class="text-sm text-gray-500">
                     {{ authStore.user?.email }}
                   </p>
                 </div>
-
                 <NuxtLink
                   to="/compte"
                   class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
@@ -82,10 +71,8 @@
                     name="heroicons:user-circle"
                     class="w-5 h-5"
                   />
-
                   Mon compte
                 </NuxtLink>
-
                 <NuxtLink
                   to="/commandes"
                   class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
@@ -95,10 +82,8 @@
                     name="heroicons:shopping-bag"
                     class="w-5 h-5"
                   />
-
                   Mes commandes
                 </NuxtLink>
-
                 <NuxtLink
                   to="/favoris"
                   class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
@@ -108,12 +93,9 @@
                     name="heroicons:heart"
                     class="w-5 h-5"
                   />
-
                   Favoris
                 </NuxtLink>
-
                 <div class="border-t"></div>
-
                 <button
                   @click="handleLogout"
                   class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50"
@@ -122,15 +104,11 @@
                     name="heroicons:arrow-right-on-rectangle"
                     class="w-5 h-5"
                   />
-
                   Déconnexion
                 </button>
-
               </div>
             </Transition>
-
           </div>
-
         </template>
           <template v-else>
             <NuxtLink to="/auth/login" class="btn-primary text-sm py-2">
@@ -138,20 +116,23 @@
             </NuxtLink>
           </template>
         </div>
-
         <!-- Bouton burger mobile -->
+         
         <button
           @click="mobileMenuOpen = !mobileMenuOpen"
           class="md:hidden p-2 -mr-2"
           aria-label="Ouvrir le menu"
         >
-          <svg v-if="!mobileMenuOpen" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-          </svg>
-          <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
+              <div
+                class="w-9 h-9 rounded-full bg-sage text-white flex items-center justify-center font-semibold"
+              >
+                {{ authStore.user?.firstName?.charAt(0).toUpperCase() }}
+              </div>
+              <span class="hidden lg:block">
+                {{ authStore.user?.firstName }}
+              </span>
+            
+            </button>
       </nav>
 
       <!-- Menu mobile (drawer) -->
@@ -163,28 +144,65 @@
         leave-from-class="opacity-100 translate-y-0"
         leave-to-class="opacity-0 -translate-y-2"
       >
-        <div v-if="mobileMenuOpen" class="md:hidden border-t border-mist bg-background px-4 py-4 flex flex-col gap-3">
-          <NuxtLink to="/produits" @click="mobileMenuOpen = false" class="py-2">Produits</NuxtLink>
-          <NuxtLink to="/panier" @click="mobileMenuOpen = false" class="py-2">
-            Panier <span v-if="cartStore.itemCount > 0" class="text-honey-dark font-semibold">({{ cartStore.itemCount }})</span>
-          </NuxtLink>
-
-          <template v-if="authStore.isAuthenticated">
-            <NuxtLink to="/compte" @click="mobileMenuOpen = false" class="py-2">
-              {{ authStore.user?.firstName }}
-            </NuxtLink>
-            <button @click="handleLogout" class="text-clay text-left py-2">Déconnexion</button>
-          </template>
-          <template v-else>
-            <NuxtLink to="/auth/login" @click="mobileMenuOpen = false" class="btn-primary text-center">
-              Connexion
-            </NuxtLink>
-          </template>
+      <div v-if="mobileMenuOpen" class="md:hidden border-t border-mist bg-background px-4 py-8 flex flex-col gap-3">
+      <div class="px-4 py-4 border-b">
+                  <p class="font-semibold">
+                    {{ authStore.user?.firstName }}
+                    {{ authStore.user?.lastName }}
+                  </p>
+                  <p class="text-sm text-gray-500">
+                    {{ authStore.user?.email }}
+                  </p>
+                </div>
+                <NuxtLink
+                  to="/compte"
+                  class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
+                  @click="userMenuOpen = false"
+                >
+                  <Icon
+                    name="heroicons:user-circle"
+                    class="w-5 h-5"
+                  />
+                  Mon compte
+                </NuxtLink>
+                <NuxtLink
+                  to="/commandes"
+                  class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
+                  @click="userMenuOpen = false"
+                >
+                  <Icon
+                    name="heroicons:shopping-bag"
+                    class="w-5 h-5"
+                  />
+                  Mes commandes
+                </NuxtLink>
+                <NuxtLink
+                  to="/favoris"
+                  class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
+                  @click="userMenuOpen = false"
+                >
+                  <Icon
+                    name="heroicons:heart"
+                    class="w-5 h-5"
+                  />
+                  Favoris
+                </NuxtLink>
+                <div class="border-t"></div>
+                <button
+                  @click="handleLogout"
+                  class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50"
+                >
+                  <Icon
+                    name="heroicons:arrow-right-on-rectangle"
+                    class="w-5 h-5"
+                  />
+                  Déconnexion
+                </button>
         </div>
       </Transition>
     </header>
 
-    <main class="flex-1 max-w-6xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">
+    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">
       <slot />
     </main>
 

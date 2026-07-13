@@ -1,12 +1,11 @@
 <template>
   <div>
-    <div class="mb-8">
-      <h1 class="text-3xl font-semibold mb-2">Nos produits</h1>
-      <p class="text-ink/60">{{ pagination?.total || 0 }} produits disponibles</p>
-    </div>
+
     
     <div class="flex flex-col lg:flex-row gap-6">
-        <!-- Filtres -->
+      
+ 
+       <!-- Filtres -->
       <aside class="lg:w-64 flex-shrink-0">
         <div class="bg-white rounded-2xl border border-mist p-5 lg:sticky lg:top-24">
           <h2 class="font-medium mb-4">Filtrer</h2>
@@ -46,7 +45,6 @@
           </button>
         </div>
       </aside>
-
       <!-- Grille produits -->
       <div class="flex-1">
         <div v-if="loading" class="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -91,7 +89,7 @@ import ProductCard from '~/components/product/ProductCard.vue';
 import { useProducts } from '~/composables/useProducts';
 import { useCategories } from '~/composables/useCategories';
 
-const { fetchProducts } = useProducts();
+const { fetchActiveProducts } = useProducts();
 const { fetchCategories } = useCategories();
 
 const products = ref<Product[]>([]);
@@ -110,7 +108,7 @@ const filters = reactive({
 const fetchData = async () => {
   loading.value = true;
   try {
-    const result = await fetchProducts({
+    const result = await fetchActiveProducts({
       search: filters.search || undefined,
       categoryId: filters.categoryId || undefined,
       sortBy: filters.sortBy,

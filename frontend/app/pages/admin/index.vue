@@ -90,7 +90,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
-const { fetchProducts } = useProducts();
+const { fetchActiveProducts } = useProducts();
 const { fetchAllOrders } = useAdminOrders();
 const { fetchUsers } = useAdminUsers();
 
@@ -99,7 +99,7 @@ const recentOrders = ref<any[]>([]);
 
 onMounted(async () => {
   const [productsRes, ordersRes, usersRes] = await Promise.all([
-    fetchProducts({ limit: 1 }),
+    fetchActiveProducts({ limit: 1 }),
     fetchAllOrders({ limit: 5 }),
     fetchUsers({ limit: 1 }),
   ]);

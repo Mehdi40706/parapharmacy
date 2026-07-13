@@ -5,6 +5,7 @@ export interface ProductQuery {
   categoryId?: string;
   minPrice?: number;
   maxPrice?: number;
+  isActive?: boolean;
   sortBy?: 'price' | 'name' | 'createdAt';
   order?: 'asc' | 'desc';
   page?: number;
@@ -20,7 +21,15 @@ const normalizeProduct = (p: any): Product => ({
 export const useProducts = () => {
   const api = useApi();
 
-  const fetchProducts = async (query?: ProductQuery) => {
+  const fetchAllProducts = async (query?: ProductQuery) => {
+     const result = await api<PaginatedResponse<Product>>('/products/admin/all', { params: query }); 
+        return {
+        ...result,
+         data: result.data.map(normalizeProduct),
+       };
+   };
+
+  const fetchActiveProducts = async (query?: ProductQuery) => {
     const result = await api<PaginatedResponse<Product>>('/products', { params: query });
     return {
       ...result,
@@ -33,5 +42,5 @@ export const useProducts = () => {
     return normalizeProduct(product);
   };
 
-  return { fetchProducts, fetchProductBySlug };
+  return { fetchActiveProducts, fetchProductBySlug, fetchAllProducts };
 };

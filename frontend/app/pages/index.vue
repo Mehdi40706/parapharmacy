@@ -84,60 +84,7 @@
       </div>
     </header>
 
-    <!-- Features / Value Proposition -->
-    <section class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3" aria-label="Nos engagements">
-      <div class="rounded-[1.5rem] border border-mist bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-sage/20">
-        <div class="w-10 h-10 rounded-full bg-sage/10 flex items-center justify-center text-sage font-bold mb-4">✓</div>
-        <p class="text-xs uppercase tracking-wider font-bold text-sage">Qualité certifiée</p>
-        <h3 class="mt-1 font-display text-xl font-bold text-ink">Des produits choisis avec soin</h3>
-        <p class="mt-2 text-sm text-ink/70 leading-relaxed">Une sélection pensée pour allier efficacité, naturel et confort d’usage.</p>
-      </div>
-      <div class="rounded-[1.5rem] border border-mist bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-sage/20">
-        <div class="w-10 h-10 rounded-full bg-sage/10 flex items-center justify-center text-sage font-bold mb-4">💡</div>
-        <p class="text-xs uppercase tracking-wider font-bold text-sage">Conseils experts</p>
-        <h3 class="mt-1 font-display text-xl font-bold text-ink">Des recommandations adaptées</h3>
-        <p class="mt-2 text-sm text-ink/70 leading-relaxed">Trouvez rapidement les soins qui correspondent à votre routine et vos besoins.</p>
-      </div>
-      <div class="rounded-[1.5rem] border border-mist bg-white p-6 shadow-sm transition-all duration-300 hover:shadow-md hover:border-sage/20 sm:col-span-2 lg:col-span-1">
-        <div class="w-10 h-10 rounded-full bg-sage/10 flex items-center justify-center text-sage font-bold mb-4">⚡</div>
-        <p class="text-xs uppercase tracking-wider font-bold text-sage">Expérience simplifiée</p>
-        <h3 class="mt-1 font-display text-xl font-bold text-ink">Commande en quelques clics</h3>
-        <p class="mt-2 text-sm text-ink/70 leading-relaxed">Ajoutez vos produits au panier, passez votre commande et profitez du suivi.</p>
-      </div>
-    </section>
-
-    <!-- Categories Section -->
-    <section v-if="categories.length" class="rounded-[2rem] border border-mist bg-white p-6 md:p-8 shadow-sm">
-      <div class="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between border-b border-mist/60 pb-5">
-        <div>
-          <p class="text-sm font-semibold uppercase tracking-[0.2em] text-sage">Catégories</p>
-          <h2 class="mt-1 font-display text-3xl font-bold text-ink">Parcourez nos univers</h2>
-        </div>
-        <NuxtLink to="/produits" class="text-sm font-semibold text-sage inline-flex items-center gap-1 transition-colors hover:text-sage-dark group">
-          Voir tous les produits 
-          <span class="transition-transform group-hover:translate-x-1">→</span>
-        </NuxtLink>
-      </div>
-
-      <div class="mt-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <NuxtLink
-          v-for="category in categories.slice(0, 6)"
-          :key="category.id"
-          :to="{ path: '/produits', query: { category: category.slug } }"
-          class="group rounded-[1.25rem] border border-mist bg-mist/30 p-5 transition-all duration-300 hover:-translate-y-1 hover:bg-white hover:shadow-md hover:border-sage/30"
-        >
-          <div class="flex items-center justify-between gap-4">
-            <div>
-              <p class="font-semibold text-ink group-hover:text-sage-dark transition-colors">{{ category.name }}</p>
-              <p class="mt-1 text-sm text-ink/70">Découvrez la sélection dédiée</p>
-            </div>
-            <span class="text-xl text-sage/70 bg-white w-8 h-8 rounded-full flex items-center justify-center border border-mist shadow-sm transition-all group-hover:bg-sage group-hover:text-white group-hover:translate-x-1">
-              →
-            </span>
-          </div>
-        </NuxtLink>
-      </div>
-    </section>
+    
 
     <!-- Featured Products Section -->
     <section class="rounded-[2rem] border border-mist bg-white p-6 md:p-8 shadow-sm">
@@ -173,18 +120,6 @@
       </div>
     </section>
 
-    <!-- Call to Action Section -->
-    <section class="rounded-[2rem] border border-mist bg-gradient-to-r from-sage/10 to-sage-light/5 p-8 md:p-10 shadow-sm">
-      <div class="flex flex-col gap-6 md:flex-row md:items-center md:justify-between max-w-5xl mx-auto">
-        <div class="space-y-2">
-          <p class="text-sm font-bold uppercase tracking-[0.2em] text-sage">Une expérience simple</p>
-          <h2 class="font-display text-2xl md:text-3xl font-bold text-ink">Faites de votre quotidien un moment de douceur</h2>
-        </div>
-        <NuxtLink to="/produits" class="btn-primary inline-flex items-center justify-center rounded-full bg-sage px-6 py-3.5 font-medium text-white shadow-sm transition-all duration-300 hover:bg-sage-dark hover:scale-[1.02] whitespace-nowrap">
-          Découvrir la collection
-        </NuxtLink>
-      </div>
-    </section>
   </div>
 </template>
 
@@ -195,7 +130,7 @@ import { useCategories } from '~/composables/useCategories';
 import { useProducts } from '~/composables/useProducts';
 
 const { fetchCategories } = useCategories();
-const { fetchProducts } = useProducts();
+const { fetchActiveProducts } = useProducts();
 
 const categories = ref<Category[]>([]);
 const featuredProducts = ref<Product[]>([]);
@@ -205,7 +140,7 @@ onMounted(async () => {
   try {
     const [categoriesResponse, productsResponse] = await Promise.all([
       fetchCategories(),
-      fetchProducts({ limit: 6, page: 1 }),
+      fetchActiveProducts({ limit: 6, page: 1 }),
     ]);
 
     categories.value = categoriesResponse;
