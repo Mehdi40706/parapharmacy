@@ -51,11 +51,13 @@
 </template>
 
 <script setup lang="ts">
+import { useToast } from '~/composables/useToast';
+
 definePageMeta({ layout: 'auth', middleware: 'guest' });
 
 const authStore = useAuthStore();
 const router = useRouter();
-
+const toast = useToast();
 const form = reactive({ firstName: '', lastName: '', email: '', password: '' });
 const loading = ref(false);
 const errorMessage = ref('');
@@ -65,10 +67,15 @@ const handleRegister = async () => {
   errorMessage.value = '';
   try {
     await authStore.register(form);
+    toast.success('Inscription réussie !');
     router.push('/produits');
   } catch (error: any) {
-    errorMessage.value = error?.data?.message || "Une erreur est survenue lors de l'inscription";
-  } finally {
+      toast.error(
+        error?.data?.message ||
+        error?.response?.data?.message ||
+        "Une erreur est survenue lors de l'inscription."
+      );
+    } finally {
     loading.value = false;
   }
 };

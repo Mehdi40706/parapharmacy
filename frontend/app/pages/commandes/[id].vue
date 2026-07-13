@@ -101,10 +101,12 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' });
 
+import { useToast } from '~/composables/useToast';
 import type { Order } from '~/types/order';
 
 const route = useRoute();
 const router = useRouter();
+const toast = useToast();
 const { fetchOrderById, cancelOrder } = useOrders();
 
 const order = ref<Order | null>(null);
@@ -134,8 +136,9 @@ const handleCancel = async () => {
   try {
     await cancelOrder(order.value.id);
     order.value = await fetchOrderById(order.value.id);
+    toast.success('Commande annulée avec succès.');
   } catch (error: any) {
-    alert(error?.data?.message || "Impossible d'annuler cette commande");
+    toast.error(error?.data?.message || "Impossible d'annuler cette commande");
   } finally {
     cancelling.value = false;
   }

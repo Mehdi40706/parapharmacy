@@ -29,14 +29,12 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Identifiants invalides');
     }
-
     const passwordValid = await bcrypt.compare(dto.password, user.password);
     if (!passwordValid) {
       throw new UnauthorizedException('Identifiants invalides');
     }
-
     return this.generateTokens(this.prisma, user.id, user.email, user.role);
-  }
+}
 
   async socialLogin(profile: OAuthProfile) {
     const user = await this.findOrCreateSocialUser(profile);
@@ -48,11 +46,9 @@ export class AuthService {
     const stored = await this.prisma.refreshToken.findUnique({
       where: { tokenHash },
     });
-
     if (!stored || stored.expiresAt < new Date()) {
       throw new UnauthorizedException('Refresh token invalide ou expiré');
     }
-
     return this.prisma.$transaction(async (prisma) => {
       await prisma.refreshToken.delete({ where: { id: stored.id } });
 
@@ -64,7 +60,6 @@ export class AuthService {
       if (!user) {
         throw new UnauthorizedException('Utilisateur introuvable');
       }
-
       return this.generateTokens(prisma, user.id, user.email, user.role);
     });
   }
@@ -81,24 +76,19 @@ export class AuthService {
       profile.provider === 'google'
         ? await this.usersService.findByGoogleId(profile.providerId)
         : await this.usersService.findByFacebookId(profile.providerId);
-
     if (providerUser) {
       return providerUser;
     }
-
     const emailUser = await this.usersService.findByEmail(profile.email);
-
     if (emailUser) {
       return profile.provider === 'google'
         ? this.usersService.linkGoogleId(emailUser.id, profile.providerId)
         : this.usersService.linkFacebookId(emailUser.id, profile.providerId);
     }
-
     const randomPassword = await bcrypt.hash(
       crypto.randomBytes(32).toString('hex'),
       10,
     );
-
     return this.usersService.createOAuthUser({
       email: profile.email,
       firstName: profile.firstName,
@@ -116,14 +106,11 @@ export class AuthService {
     role: Role,
   ) {
     const payload = { sub: userId, email, role };
-
     const access_token = this.jwtService.sign(payload, { expiresIn: '15m' });
-
     const refresh_token = crypto.randomBytes(64).toString('hex');
     const tokenHash = this.hashToken(refresh_token);
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7);
-
     await prisma.refreshToken.create({
       data: {
         tokenHash,
@@ -131,29 +118,40 @@ export class AuthService {
         expiresAt,
       },
     });
-
     return { access_token, refresh_token };
   }
 
   async requestPasswordReset(email: string) {
     const user = await this.usersService.findByEmail(email);
-
-    // On ne révèle jamais si l'email existe ou non (sécurité)
     if (!user) {
       return { message: 'Si ce compte existe, un email a été envoyé.' };
     }
-
     const resetToken = crypto.randomBytes(32).toString('hex');
     const resetTokenExpiry = new Date(Date.now() + 3600000); // 1h
-
     await this.prisma.user.update({
       where: { id: user.id },
       data: { resetToken, resetTokenExpiry },
     });
-
     await this.mailService.sendPasswordResetEmail(user.email, resetToken);
-
     return { message: 'Si ce compte existe, un email a été envoyé.' };
+  }
+
+  async changePassword(userId: string, currentPassword: string, newPassword: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new UnauthorizedException('Utilisateur introuvable');
+    }
+    const passwordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!passwordValid) {
+      throw new UnauthorizedException('Mot de passe actuel incorrect');
+    }
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { password: hashedPassword },
+    });
+    await this.prisma.refreshToken.deleteMany({ where: { userId } });
+    return { message: 'Mot de passe mis à jour avec succès' };
   }
 
   async resetPassword(token: string, newPassword: string) {
@@ -167,9 +165,7 @@ export class AuthService {
     if (!user) {
       throw new UnauthorizedException('Token invalide ou expiré');
     }
-
     const hashedPassword = await bcrypt.hash(newPassword, 10);
-
     await this.prisma.$transaction([
       this.prisma.user.update({
         where: { id: user.id },

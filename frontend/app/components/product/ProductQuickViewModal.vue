@@ -58,7 +58,7 @@
                   v-if="product.stock > 0"
                   class="badge-pill bg-sage/10 text-sage-dark"
                 >
-                  En stock ({{ product.stock }})
+                  En stock 
                 </span>
                 <span v-else class="badge-pill bg-clay/10 text-clay">Rupture de stock</span>
               </div>
@@ -72,7 +72,7 @@
                   </svg>
                   Conseil d'utilisation
                 </p>
-                <p class="text-sm text-ink/70 italic">{{ product.usageInstructions }}</p>
+                <p class="text-sm text-ink/70 italic whitespace-pre-line">{{ product.usageInstructions }}</p>
               </div>
 
               <div v-if="product.tags?.length" class="flex flex-wrap gap-2 mb-6">

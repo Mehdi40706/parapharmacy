@@ -136,12 +136,6 @@ async findAllAdmin(query: QueryProductDto) {
     }
 
     const slug = this.slugify(dto.name);
-    const existing = await this.prisma.product.findUnique({
-      where: { slug },
-    });
-    if (existing) {
-      throw new ConflictException('Un produit avec ce nom existe déjà');
-    }
 
     return this.prisma.product.create({
       data: {
@@ -181,6 +175,8 @@ async findAllAdmin(query: QueryProductDto) {
   }
 
   async archive(id: string) {
+    await this.findOne(id);
+
     return this.prisma.product.update({
       where: { id },
       data: { isActive: false },
@@ -190,6 +186,7 @@ async findAllAdmin(query: QueryProductDto) {
   
   async restore(id: string) {
     await this.findOne(id);
+    
     return this.prisma.product.update({
       where: { id },
       data: { isActive: true },
@@ -198,7 +195,8 @@ async findAllAdmin(query: QueryProductDto) {
   }
   
   async remove(id: string) {
-    // Vérifie si le produit a déjà été commandé
+    await this.findOne(id);
+
     const orderItemsCount = await this.prisma.orderItem.count({
       where: { productId: id },
     });

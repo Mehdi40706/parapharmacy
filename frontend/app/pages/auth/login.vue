@@ -47,8 +47,10 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'auth', middleware: 'guest' });
+import { useToast } from '~/composables/useToast';
 
+definePageMeta({ layout: 'auth', middleware: 'guest' });
+const toast = useToast();
 const authStore = useAuthStore();
 const router = useRouter();
 
@@ -62,7 +64,6 @@ const handleLogin = async () => {
 
   try {
     await authStore.login(form.email, form.password);
-
     // Redirection selon le rôle
     if (authStore.isAdmin) {
       router.push('/admin');
@@ -70,7 +71,11 @@ const handleLogin = async () => {
       router.push('/produits');
     }
   } catch (error: any) {
-    errorMessage.value = error?.data?.message || 'Email ou mot de passe incorrect';
+     if(error.response?.status === 429) {
+    toast.error("Trop de tentatives de connexion. Veuillez patienter 1 minute avant de réessayer.");
+  } else {
+    toast.error(error?.data?.message || 'Email ou mot de passe incorrect');
+  }
   } finally {
     loading.value = false;
   }

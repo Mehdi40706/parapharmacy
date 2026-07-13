@@ -6,11 +6,12 @@
         class="fixed inset-0 z-20 bg-slate-950/40 lg:hidden"
         @click="menuOpen = false"
       />
-
       <aside
+        @click.stop
         :class="[
-          'fixed inset-y-0 left-0 z-30 flex w-72 flex-col border-r border-white/10 bg-slate-950 p-5 text-white shadow-2xl transition-transform duration-300 lg:static lg:translate-x-0 lg:border-r-mist/20 lg:bg-slate-950',
-          menuOpen ? 'translate-x-0' : '-translate-x-full'
+          'fixed inset-y-0 left-0 z-30 flex w-72 flex-col overflow-y-auto border-r border-white/10 bg-slate-950 p-5 text-white shadow-2xl transition-transform duration-300',
+          menuOpen ? 'translate-x-0' : '-translate-x-full',
+          'lg:translate-x-0'
         ]"
       >
         <div class="mb-8 flex items-center justify-between">
@@ -39,19 +40,16 @@
           </NuxtLink>
         </nav>
         <div class="border-t border-white/10 pt-4">
-  <button
-    @click="handleLogout"
-    class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
-  >
-    <Icon name="lucide:log-out" class="w-5 h-5" />
-    <span>Logout</span>
-  </button>
-</div>
-
-   
+          <button
+            @click="handleLogout"
+            class="flex w-full items-center gap-3 rounded-2xl px-4 py-3 text-sm font-medium text-red-400 transition hover:bg-red-500/10 hover:text-red-300"
+          >
+            <Icon name="lucide:log-out" class="w-5 h-5" />
+            <span>Logout</span>
+          </button>
+        </div>
       </aside>
-
-      <div class="flex-1">
+      <div class="flex-1 min-w-0 lg:pl-72">
         <header class="sticky top-0 z-20 border-b border-mist/70 bg-background/90 backdrop-blur-xl">
           <div class="flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
             <div class="flex items-center gap-3">
@@ -76,7 +74,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted, onUnmounted } from 'vue';
 
 
 const route = useRoute();
@@ -96,6 +94,19 @@ const authStore = useAuthStore();
 const router = useRouter();
 const mobileMenuOpen = ref(false);
 
+const closeMenuOnEscape = (event: KeyboardEvent) => {
+  if (event.key === 'Escape') {
+    menuOpen.value = false;
+  }
+};
+
+onMounted(() => {
+  window.addEventListener('keydown', closeMenuOnEscape);
+});
+
+onUnmounted(() => {
+  window.removeEventListener('keydown', closeMenuOnEscape);
+});
 const handleLogout = () => {
   authStore.logout();
   mobileMenuOpen.value = false;

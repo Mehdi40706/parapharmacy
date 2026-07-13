@@ -1,1 +1,0 @@
-import{u}from"./Ct40dybG.js";const s=t=>({...t,price:Number(t.price)}),n=()=>{const t=u();return{fetchProducts:async r=>{const c=await t("/products",{params:r});return{...c,data:c.data.map(s)}},fetchProductBySlug:async r=>{const c=await t(`/products/slug/${r}`);return s(c)}}};export{n as u};

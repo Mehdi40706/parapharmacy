@@ -15,6 +15,7 @@
 </template>
 
 <script setup lang="ts">
+import { useToast } from '~/composables/useToast.js';
 import ProductForm from '../ProductForm.vue';
 
 definePageMeta({ layout: 'admin', middleware: 'admin' });
@@ -23,6 +24,7 @@ const { createProduct } = useAdminProducts();
 const router = useRouter();
 const loading = ref(false);
 const errorMessage = ref('');
+const toast = useToast();
 
 const handleSubmit = async (payload: any) => {
   loading.value = true;
@@ -31,7 +33,12 @@ const handleSubmit = async (payload: any) => {
     await createProduct(payload);
     router.push('/admin/produits');
   } catch (error: any) {
-    errorMessage.value = error?.data?.message || 'Erreur lors de la création';
+    toast.error(
+      error?.data?.message ||
+      error?.response?.data?.message ||
+      "Une erreur est survenue lors de la création du produit."
+    );
+
   } finally {
     loading.value = false;
   }

@@ -117,7 +117,18 @@
           </template>
         </div>
         <!-- Bouton burger mobile -->
-         
+            <NuxtLink to="/panier" class="relative hover:text-sage transition-colors">
+            <Icon
+              name="heroicons:shopping-cart"
+              class="w-6 h-6"
+            />            
+            <span
+              v-if="cartStore.itemCount > 0"
+              class="absolute -top-2 -right-3 bg-honey text-ink text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
+            >
+              {{ cartStore.itemCount }}
+            </span>
+          </NuxtLink>
         <button
           @click="mobileMenuOpen = !mobileMenuOpen"
           class="md:hidden p-2 -mr-2"

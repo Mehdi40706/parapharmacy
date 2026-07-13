@@ -2,6 +2,7 @@ import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { PrismaExceptionFilter } from './common/filters/prisma-exception.filter';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -13,14 +14,12 @@ async function bootstrap() {
     }),
   );
 app.enableCors({
-  // In docker/ngrok dev flows we allow the origin to be reflected so preflight
-  // responses include Access-Control-Allow-Origin. For production tighten this.
   origin: true,
   methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
   allowedHeaders: 'Content-Type, Accept, Authorization',
   credentials: true,
 });
-
+app.useGlobalFilters(new PrismaExceptionFilter());
 await app.listen(5000);
 }
 bootstrap();

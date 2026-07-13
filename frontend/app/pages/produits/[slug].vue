@@ -20,8 +20,17 @@
       <div>
         <span class="badge-pill bg-mist text-sage-dark mb-3">{{ product.category.name }}</span>
         <h1 class="text-2xl sm:text-3xl font-semibold mb-3">{{ product.name }}</h1>
-<p class="price text-2xl mb-5">{{ Number(product.price).toFixed(2) }} TND</p>
+        <p class="price text-2xl mb-5">{{ Number(product.price).toFixed(2) }} TND</p>
         <p class="text-ink/70 leading-relaxed mb-6">{{ product.description }}</p>
+        
+            <div v-if="product.usageInstructions" class="bg-mist/60 rounded-xl p-4 mb-4">
+            <p>
+            <Icon name="lucide:info" class="w-3.5 h-3.5" />
+              Conseil d'utilisation
+            </p>
+                <p class="text-sm text-ink/70 italic whitespace-pre-line">{{ product.usageInstructions }}</p>
+            </div>
+
 
         <div class="mb-6">
           <span

@@ -18,6 +18,7 @@ import { RefreshDto } from './dto/refresh.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { ForgotPasswordDto } from './dto/forgot-password.dto';
 import { ResetPasswordDto } from './dto/reset-password.dto';
+import { ChangePasswordDto } from './dto/change-password.dto'
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { FacebookAuthGuard } from './guards/facebook-auth.guard';
 import type { OAuthProfile } from './interfaces/oauth-profile.interface';
@@ -34,7 +35,7 @@ export class AuthController {
     return this.authService.register(dto);
   }
 
-  @Throttle({ default: { limit: 5, ttl: 60000 } })
+  @Throttle({ default: { limit: 100, ttl: 60000 } })
   @Post('login')
   login(@Body() dto: LoginDto) {
     return this.authService.login(dto);
@@ -87,6 +88,15 @@ export class AuthController {
     const updated = await this.usersService.update(user.userId, dto);
     const { password, ...safeUser } = updated;
     return safeUser;
+  }
+
+  @UseGuards(JwtAuthGuard)
+  @Patch('change-password')
+  async changePassword(
+    @CurrentUser() user: { userId: string },
+    @Body() dto: ChangePasswordDto,
+  ) {
+    return this.authService.changePassword(user.userId, dto.currentPassword, dto.newPassword);
   }
 
   @Post('logout')

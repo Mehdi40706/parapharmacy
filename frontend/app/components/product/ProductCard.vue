@@ -1,5 +1,5 @@
 <template>
-  <div class="group flex flex-col bg-white rounded-2xl border border-mist overflow-hidden hover:shadow-md transition-shadow duration-200">
+  <div class="group flex flex-col h-full bg-white rounded-2xl border border-mist overflow-hidden hover:shadow-md transition-shadow duration-200">
     <!-- Image -->
     <div class="aspect-[4/3] bg-mist relative overflow-hidden">
       <img
@@ -46,7 +46,7 @@
         {{ product.description }}
       </p>
 
-      <div class="mt-3 flex items-center justify-between">
+      <div class="mt-auto pt-3 flex items-center justify-between gap-3">
         <div>
           <span class="text-[11px] text-ink/40 block uppercase tracking-wide">Prix</span>
           <span class="price text-lg">{{ Number(product.price).toFixed(2) }} TND</span>

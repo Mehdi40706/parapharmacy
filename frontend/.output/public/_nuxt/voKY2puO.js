@@ -1,1 +1,0 @@
-import{u as e}from"./Ct40dybG.js";const p=()=>{const o=e();return{createProduct:t=>o("/products",{method:"POST",body:t}),updateProduct:(t,d)=>o(`/products/${t}`,{method:"PATCH",body:d}),deleteProduct:t=>o(`/products/${t}`,{method:"DELETE"})}};export{p as u};
