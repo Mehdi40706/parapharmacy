@@ -1,9 +1,9 @@
 <template>
   <div>
-    <h1 class="text-2xl font-semibold mb-1">Content de vous revoir</h1>
-    <p class="text-ink/60 text-sm mb-6">Connectez-vous à votre compte</p>
+    <h1 class="text-2xl font-semibold mb-1">Récupération de mot de passe</h1>
+    <p class="text-ink/60 text-sm mb-6">Entrez votre adresse email pour récupérer votre mot de passe</p>
 
-    <form @submit.prevent="handleLogin" class="flex flex-col gap-4">
+    <form @submit.prevent="handleRecover" class="flex flex-col gap-4">
       <div>
         <label class="block text-sm font-medium mb-1.5">Email</label>
         <input
@@ -14,20 +14,8 @@
           placeholder="vous@exemple.com"
         />
       </div>
-
-      <div>
-        <label class="block text-sm font-medium mb-1.5">Mot de passe</label>
-        <input
-          v-model="form.password"
-          type="password"
-          required
-          class="input-field"
-          placeholder="••••••••"
-        />
-      </div>
-
       <button type="submit" :disabled="loading" class="btn-primary mt-2">
-        {{ loading ? 'Connexion...' : 'Se connecter' }}
+        {{ loading ? '...' : 'Submit' }}
       </button>
 
       <div class="flex justify-between text-sm pt-2">
@@ -54,7 +42,7 @@ const form = reactive({ email: '', password: '' });
 const loading = ref(false);
 const errorMessage = ref('');
 
-const handleLogin = async () => {
+const handleRecover = async () => {
   loading.value = true;
   errorMessage.value = '';
 
@@ -76,4 +64,4 @@ const handleLogin = async () => {
     loading.value = false;
   }
 };
-</script>
+</script>   

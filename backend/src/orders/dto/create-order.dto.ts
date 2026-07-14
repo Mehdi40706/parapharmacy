@@ -1,19 +1,49 @@
 import { Type } from 'class-transformer';
 import {
-  IsArray,
-  IsUUID,
-  IsInt,
-  Min,
-  ValidateNested,
   ArrayMinSize,
+  IsArray,
+  IsEnum,
+  IsInt,
+  IsNotEmpty,
+  IsOptional,
+  IsPositive,
+  IsString,
+  ValidateNested,
 } from 'class-validator';
+import { PaymentMethod }  from '@prisma/client';
 
-class OrderItemDto {
-  @IsUUID()
+
+
+
+export class ShippingAddressDto {
+  @IsString()
+  @IsNotEmpty()
+  fullName!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  phone!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  address!: string;
+
+  @IsString()
+  @IsNotEmpty()
+  city!: string;
+
+  @IsOptional()
+  @IsString()
+  postalCode?: string;
+}
+
+export class OrderItemDto {
+  @IsString()
+  @IsNotEmpty()
   productId!: string;
 
   @IsInt()
-  @Min(1)
+  @IsPositive()
   quantity!: number;
 }
 
@@ -23,4 +53,10 @@ export class CreateOrderDto {
   @ValidateNested({ each: true })
   @Type(() => OrderItemDto)
   items!: OrderItemDto[];
+  
+  @IsEnum(PaymentMethod)
+  paymentMethod:PaymentMethod;
+  @ValidateNested()
+  @Type(() => ShippingAddressDto)
+  shippingAddress!: ShippingAddressDto;
 }

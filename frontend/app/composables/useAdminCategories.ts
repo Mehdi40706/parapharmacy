@@ -12,5 +12,6 @@ export const useAdminCategories = () => {
   const deleteCategory = (id: string) =>
     api(`/categories/${id}`, { method: 'DELETE' });
 
+
   return { createCategory, updateCategory, deleteCategory };
 };

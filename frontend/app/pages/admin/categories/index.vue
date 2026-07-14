@@ -34,6 +34,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
+import { useToast } from '~/composables/useToast';
 import type { Category } from '~/types/product';
 
 const { fetchCategories } = useCategories();
@@ -43,15 +44,27 @@ const categories = ref<Category[]>([]);
 const newName = ref('');
 const editingId = ref<string | null>(null);
 const editName = ref('');
+const toast=useToast();
 
 const load = async () => {
   categories.value = await fetchCategories();
 };
 
 const handleCreate = async () => {
-  await createCategory(newName.value);
-  newName.value = '';
-  await load();
+  try {
+    await createCategory(newName.value);
+
+    toast.success(`Catégorie "${newName.value}" crée avec succès.`);
+
+    newName.value = '';
+    await load();
+  } catch (error: any) {
+    toast.error(
+      error?.data?.message ??
+      error?.response?.data?.message ??
+      'Une erreur est survenue.'
+    );
+  }
 };
 
 const startEdit = (cat: Category) => {
@@ -60,16 +73,39 @@ const startEdit = (cat: Category) => {
 };
 
 const saveEdit = async (id: string) => {
-  await updateCategory(id, editName.value);
-  editingId.value = null;
-  await load();
+  try {
+    await updateCategory(id, editName.value);
+
+    toast.success('Catégorie mise à jour avec succès.');
+
+    editingId.value = null;
+    await load();
+  } catch (error: any) {
+    toast.error(
+      error?.data?.message ??
+      error?.response?.data?.message ??
+      'Une erreur est survenue.'
+    );
+  }
 };
 
 const handleDelete = async (id: string) => {
   if (!confirm('Supprimer cette catégorie ?')) return;
-  await deleteCategory(id);
-  await load();
-};
+
+  try {
+    await deleteCategory(id);
+
+    toast.success('Catégorie supprimée avec succès.');
+
+    await load();
+  } catch (error: any) {
+    toast.error(
+      error?.data?.message ??
+      error?.response?.data?.message ??
+      'Une erreur est survenue.'
+  );
+  }   
+}
 
 onMounted(load);
 </script>

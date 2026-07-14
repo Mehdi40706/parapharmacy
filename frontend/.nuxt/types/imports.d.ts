@@ -99,6 +99,7 @@ declare global {
   const tryUseNuxtApp: typeof import('../../node_modules/nuxt/dist/app/nuxt').tryUseNuxtApp
   const unref: typeof import('vue').unref
   const updateAppConfig: typeof import('../../node_modules/nuxt/dist/app/config').updateAppConfig
+  const useAccountForm: typeof import('../../app/composables/useAccountForm').useAccountForm
   const useAdminCategories: typeof import('../../app/composables/useAdminCategories').useAdminCategories
   const useAdminOrders: typeof import('../../app/composables/useAdminOrders').useAdminOrders
   const useAdminProducts: typeof import('../../app/composables/useAdminProducts').useAdminProducts
@@ -196,6 +197,7 @@ declare global {
   const useState: typeof import('../../node_modules/nuxt/dist/app/composables/state').useState
   const useStorage: typeof import('../../app/composables/useStorage').useStorage
   const useTemplateRef: typeof import('vue').useTemplateRef
+  const useToast: typeof import('../../app/composables/useToast').useToast
   const useTransitionState: typeof import('vue').useTransitionState
   const watch: typeof import('vue').watch
   const watchEffect: typeof import('vue').watchEffect
@@ -225,6 +227,9 @@ declare global {
   // @ts-ignore
   export type { ProductQuery } from '../../app/composables/useProducts'
   import('../../app/composables/useProducts')
+  // @ts-ignore
+  export type { Toast } from '../../app/composables/useToast'
+  import('../../app/composables/useToast')
   // @ts-ignore
   export type { CartItem } from '../../app/stores/cart.store'
   import('../../app/stores/cart.store')
@@ -331,6 +336,7 @@ declare module 'vue' {
     readonly tryUseNuxtApp: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/nuxt')['tryUseNuxtApp']>
     readonly unref: UnwrapRef<typeof import('vue')['unref']>
     readonly updateAppConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/config')['updateAppConfig']>
+    readonly useAccountForm: UnwrapRef<typeof import('../../app/composables/useAccountForm')['useAccountForm']>
     readonly useAdminCategories: UnwrapRef<typeof import('../../app/composables/useAdminCategories')['useAdminCategories']>
     readonly useAdminOrders: UnwrapRef<typeof import('../../app/composables/useAdminOrders')['useAdminOrders']>
     readonly useAdminProducts: UnwrapRef<typeof import('../../app/composables/useAdminProducts')['useAdminProducts']>
@@ -428,6 +434,7 @@ declare module 'vue' {
     readonly useState: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/state')['useState']>
     readonly useStorage: UnwrapRef<typeof import('../../app/composables/useStorage')['useStorage']>
     readonly useTemplateRef: UnwrapRef<typeof import('vue')['useTemplateRef']>
+    readonly useToast: UnwrapRef<typeof import('../../app/composables/useToast')['useToast']>
     readonly useTransitionState: UnwrapRef<typeof import('vue')['useTransitionState']>
     readonly watch: UnwrapRef<typeof import('vue')['watch']>
     readonly watchEffect: UnwrapRef<typeof import('vue')['watchEffect']>

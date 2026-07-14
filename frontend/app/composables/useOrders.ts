@@ -1,7 +1,9 @@
-import type { Order, PaginatedResponse } from '~/types/order';
+import type { Order, PaginatedResponse, ShippingAddress } from '~/types/order';
 
 export interface CreateOrderPayload {
   items: { productId: string; quantity: number }[];
+  paymentMethod: string;
+  shippingAddress: ShippingAddress;
 }
 
 const normalizeOrder = (o: any): Order => ({

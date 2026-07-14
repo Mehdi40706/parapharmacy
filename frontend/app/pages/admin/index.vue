@@ -14,7 +14,7 @@
         </div>
       </div>
 
-      <div class="mt-6 grid gap-4 xl:grid-cols-3">
+      <div class="mt-6 grid gap-4 xl:grid-cols-4">
         <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-sage/10 to-white p-5">
           <p class="text-sm text-ink/60">Produits</p>
           <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.products }}</p>
@@ -29,6 +29,11 @@
           <p class="text-sm text-ink/60">Utilisateurs</p>
           <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.users }}</p>
           <p class="mt-2 text-sm text-ink/60">Comptes actifs dans la plateforme</p>
+        </div>
+        <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-clay/20 to-white p-5">
+          <p class="text-sm text-ink/60">Categories</p>
+          <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.categories }}</p>
+          <p class="mt-2 text-sm text-ink/60">Total des catégories dans la plateforme</p>
         </div>
       </div>
     </section>
@@ -88,25 +93,29 @@
 </template>
 
 <script setup lang="ts">
+
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
 const { fetchActiveProducts } = useProducts();
 const { fetchAllOrders } = useAdminOrders();
 const { fetchUsers } = useAdminUsers();
+const { fetchCategories }= useCategories();
 
-const stats = reactive({ products: 0, orders: 0, users: 0 });
+const stats = reactive({ products: 0, orders: 0, users: 0 , categories: 0});
 const recentOrders = ref<any[]>([]);
 
 onMounted(async () => {
-  const [productsRes, ordersRes, usersRes] = await Promise.all([
+  const [productsRes, ordersRes, usersRes, categoriesRes] = await Promise.all([
     fetchActiveProducts({ limit: 1 }),
     fetchAllOrders({ limit: 5 }),
     fetchUsers({ limit: 1 }),
+    fetchCategories()
   ]);
 
   stats.products = productsRes.meta.total;
   stats.orders = ordersRes.meta.total;
   stats.users = usersRes.meta.total;
+  stats.categories = categoriesRes.length;
   recentOrders.value = ordersRes.data;
 });
 </script>

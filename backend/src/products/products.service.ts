@@ -209,19 +209,74 @@ async findAllAdmin(query: QueryProductDto) {
     return this.prisma.product.delete({ where: { id } });
   }
 
+  async reserveStock(
+  productId: string,
+  quantity: number,
+  tx?: Prisma.TransactionClient,
+) {
+  const db = tx ?? this.prisma;
 
-  async decrementStock(productId: string, quantity: number) {
-    const product = await this.findOne(productId);
+  // atomique : n'update que si stock - reservedStock >= quantity
+  const result = await db.$executeRaw`
+    UPDATE "Product"
+    SET "reservedStock" = "reservedStock" + ${quantity}
+    WHERE id = ${productId}
+      AND ("stock" - "reservedStock") >= ${quantity}
+  `;
 
-    if (product.stock < quantity) {
-      throw new BadRequestException(
-        `Stock insuffisant pour "${product.name}" (disponible: ${product.stock})`,
-      );
-    }
-
-    return this.prisma.product.update({
-      where: { id: productId },
-      data: { stock: { decrement: quantity } },
-    });
+  if (result === 0) {
+    const product = await db.product.findUnique({ where: { id: productId } });
+    const name = product?.name ?? productId;
+    throw new BadRequestException(`Stock insuffisant pour "${name}"`);
   }
 }
+
+  async releaseStock(
+    productId: string,
+    quantity: number,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const db = tx ?? this.prisma;
+    await db.product.update({
+      where: { id: productId },
+      data: { reservedStock: { decrement: quantity } },
+    });
+  }
+
+  async confirmStock(
+    productId: string,
+    quantity: number,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const db = tx ?? this.prisma;
+    await db.product.update({
+      where: { id: productId },
+      data: {
+        stock: { decrement: quantity },
+        reservedStock: { decrement: quantity },
+      },
+    });
+  }
+
+  // Pour le flow COD : décrémentation directe, toujours atomique
+  async decrementStock(
+    productId: string,
+    quantity: number,
+    tx?: Prisma.TransactionClient,
+  ) {
+    const db = tx ?? this.prisma;
+
+    const result = await db.product.updateMany({
+      where: { id: productId, stock: { gte: quantity } },
+      data: { stock: { decrement: quantity } },
+    });
+
+    if (result.count === 0) {
+      const product = await db.product.findUnique({ where: { id: productId } });
+      const name = product?.name ?? productId;
+      throw new BadRequestException(`Stock insuffisant pour "${name}"`);
+    }
+  }
+
+
+  }

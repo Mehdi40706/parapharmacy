@@ -17,6 +17,7 @@ interface _GlobalComponents {
   OrderStatusBadge: typeof import("../../app/components/order/OrderStatusBadge.vue")['default']
   ProductCard: typeof import("../../app/components/product/ProductCard.vue")['default']
   ProductQuickViewModal: typeof import("../../app/components/product/ProductQuickViewModal.vue")['default']
+  UiToastContainer: typeof import("../../app/components/ui/ToastContainer.vue")['default']
   NuxtWelcome: typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']
   NuxtLayout: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
   NuxtErrorBoundary: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -45,6 +46,7 @@ interface _GlobalComponents {
   LazyOrderStatusBadge: LazyComponent<typeof import("../../app/components/order/OrderStatusBadge.vue")['default']>
   LazyProductCard: LazyComponent<typeof import("../../app/components/product/ProductCard.vue")['default']>
   LazyProductQuickViewModal: LazyComponent<typeof import("../../app/components/product/ProductQuickViewModal.vue")['default']>
+  LazyUiToastContainer: LazyComponent<typeof import("../../app/components/ui/ToastContainer.vue")['default']>
   LazyNuxtWelcome: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
   LazyNuxtLayout: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
   LazyNuxtErrorBoundary: LazyComponent<typeof import("../../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>

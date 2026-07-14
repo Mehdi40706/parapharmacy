@@ -6,15 +6,13 @@ export const useApi = () => {
 
   const apiFetch = $fetch.create({
     baseURL: config.public.apiBase,
-
     onRequest({ options }) {
       if (authStore.accessToken) {
-        options.headers = {
-          ...options.headers,
-          Authorization: `Bearer ${authStore.accessToken}`,
-        } as any;
+        const headers = new Headers(options.headers as HeadersInit);
+        headers.set("Authorization", `Bearer ${authStore.accessToken}`);
+        options.headers = headers;
       }
-    },
+},
 
     async onResponseError({ response, request, options }) {
       if (response.status === 401 && authStore.refreshToken) {

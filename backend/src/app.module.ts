@@ -14,6 +14,8 @@ import { OrdersModule } from './orders/orders.module';
 import { PaymentsModule } from './payments/payments.module';
 import { StorageModule } from './storage/storage.module';
 import { ConfigModule } from '@nestjs/config';
+import { ScheduleModule } from '@nestjs/schedule';
+
 
 @Module({
   imports: [
@@ -35,6 +37,8 @@ import { ConfigModule } from '@nestjs/config';
     ConfigModule.forRoot({
       isGlobal: true,
     }), StorageModule,
+    ScheduleModule.forRoot()
+
   ],
   providers: [
     {

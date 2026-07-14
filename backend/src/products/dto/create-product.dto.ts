@@ -32,6 +32,13 @@ export class CreateProductDto {
   @IsOptional()
   stock?: number;
 
+
+  @Type(() => Number)
+  @IsInt()
+  @Min(0)
+  @IsOptional()
+  reservedStock?: number;
+  
   @IsOptional()
   @IsBoolean()
   isActive?: boolean;
@@ -39,12 +46,6 @@ export class CreateProductDto {
   @IsOptional()
   @IsString()
   usageInstructions?: string;
-
-  @IsOptional()
-  @IsArray()
-  @IsString({ each: true })
-  tags?: string[];
-
 
   @IsOptional()
   @IsString()

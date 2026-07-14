@@ -27,6 +27,11 @@ enum PaymentStatus {
   REFUNDED
 }
 
+enum PaymentMethod {
+  ONLINE
+  COD
+}
+
 
 model User {
   id        String   @id @default(uuid())
@@ -68,7 +73,8 @@ model Product {
   slug              String      @unique
   description       String
   price             Decimal
-  stock             Int         @default(0)
+  stock             Int      @default(0)      // stock réellement disponible à la vente
+  reservedStock     Int      @default(0)      // quantité actuellement bloquée par des commandes PENDING non expirées
   isActive          Boolean     @default(true)
   imageUrl          String?
   usageInstructions String?     
@@ -85,11 +91,23 @@ model Order {
   userId          String
   status          OrderStatus   @default(PENDING)
   paymentStatus   PaymentStatus @default(PENDING)
-  paymentRef      String?       @unique
+  paymentMethod   PaymentMethod @default(ONLINE)
   totalPrice      Decimal
+
+  // Shipping snapshot — captured at order time, independent of user profile
+  shippingFullName    String
+  shippingPhone       String
+  shippingAddress     String
+  shippingCity        String
+  shippingPostalCode  String?
+
   items           OrderItem[]
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
+  expiresAt       DateTime?
+
+  payments        Payment[]
+
 }
 
 model OrderItem {
@@ -100,4 +118,17 @@ model OrderItem {
   productId String
   quantity  Int
   price     Decimal
+}
+
+model Payment {
+  id        String        @id @default(uuid())
+  order     Order         @relation(fields: [orderId], references: [id])
+  orderId   String
+  provider  String        @default("konnect")
+  providerRef String      @unique
+  status    PaymentStatus @default(PENDING)
+  amount    Decimal
+  rawResponse Json?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 }

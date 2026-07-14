@@ -11,12 +11,21 @@ export interface OrderItem {
   product: Product;
 }
 
+export interface ShippingAddress {
+  fullName: string;
+  phone: string;
+  address: string;
+  city: string;
+  postalCode?: string;
+}
+
 export interface Order {
   id: string;
   status: OrderStatus;
   paymentStatus: PaymentStatus;
   totalPrice: number;
   items: OrderItem[];
+  shipping: ShippingAddress;
   createdAt: string;
 }
 
@@ -27,4 +36,5 @@ export interface PaginatedResponse<T> {
     page: number;
     limit: number;
     totalPages: number;
-  }}
+  };
+}

@@ -75,6 +75,7 @@
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
+import { useToast } from '~/composables/useToast';
 import type { Product } from '~/types/product';
 
 const { fetchAllProducts } = useProducts();
@@ -83,6 +84,7 @@ const { deleteProduct, archiveProduct, restoreProduct } = useAdminProducts();
 const products = ref<Product[]>([]);
 const pagination = ref<any>(null);
 const currentPage = ref(1);
+const toast=useToast();
 
 const load = async () => {
   const result = await fetchAllProducts({ page: currentPage.value, limit: 10 });
@@ -97,18 +99,46 @@ const goToPage = (page: number) => {
 
 const handleDelete = async (id: string) => {
   if (!confirm('Supprimer ce produit ?')) return;
-  await deleteProduct(id);
-  await load();
-};
-
+    try{
+      await deleteProduct(id);
+      await load();
+      toast.success('Produit supprimé avec succès.');
+    }catch(error:any){
+      toast.error(
+        error?.data?.message ??
+        error?.response?.data?.message ??
+        'Une erreur est survenue.'
+      );
+    };
+  }
 const handleArchive = async (id: string) => {
-  await archiveProduct(id);
-  await load();
+  try{
+      await archiveProduct(id);
+      await load();
+      toast.success('Produit archivé avec succès.');
+  }
+  catch(error:any){
+      toast.error(
+        error?.data?.message ??
+        error?.response?.data?.message ??
+        'Une erreur est survenue.'
+      );
+    };
+
 };
 
 const handleRestore = async (id: string) => {
-  await restoreProduct(id);
-  await load();
+  try{
+    await restoreProduct(id);
+    await load();
+  }
+  catch(error:any){
+    toast.error(
+      error?.data?.message ??
+      error?.response?.data?.message ??
+      'Une erreur est survenue.'
+    );
+  }
 };
 
 onMounted(load);

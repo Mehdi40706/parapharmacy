@@ -17,6 +17,7 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 export const OrderStatusBadge: typeof import("../app/components/order/OrderStatusBadge.vue")['default']
 export const ProductCard: typeof import("../app/components/product/ProductCard.vue")['default']
 export const ProductQuickViewModal: typeof import("../app/components/product/ProductQuickViewModal.vue")['default']
+export const UiToastContainer: typeof import("../app/components/ui/ToastContainer.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
 export const NuxtErrorBoundary: typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']
@@ -45,6 +46,7 @@ export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components
 export const LazyOrderStatusBadge: LazyComponent<typeof import("../app/components/order/OrderStatusBadge.vue")['default']>
 export const LazyProductCard: LazyComponent<typeof import("../app/components/product/ProductCard.vue")['default']>
 export const LazyProductQuickViewModal: LazyComponent<typeof import("../app/components/product/ProductQuickViewModal.vue")['default']>
+export const LazyUiToastContainer: LazyComponent<typeof import("../app/components/ui/ToastContainer.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>
 export const LazyNuxtErrorBoundary: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-error-boundary.vue")['default']>
