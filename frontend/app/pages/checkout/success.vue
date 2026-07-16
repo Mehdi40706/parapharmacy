@@ -16,7 +16,7 @@
         Votre commande a bien été enregistrée. Vous réglerez en espèces à la livraison.
         Un email de confirmation vous a été envoyé.
       </p>
-      <NuxtLink to="/compte/commandes" class="btn-primary mt-2">Voir mes commandes</NuxtLink>
+      <NuxtLink to="/commandes" class="btn-primary mt-2">Voir mes commandes</NuxtLink>
     </div>
 
     <div v-else-if="status === 'PAID'" class="flex flex-col items-center gap-4">
@@ -27,7 +27,7 @@
       </div>
       <h1 class="text-2xl font-semibold">Paiement confirmé !</h1>
       <p class="text-ink/60">Votre commande a bien été enregistrée. Un email de confirmation vous a été envoyé.</p>
-      <NuxtLink to="/compte/commandes" class="btn-primary mt-2">Voir mes commandes</NuxtLink>
+      <NuxtLink to="/commandes" class="btn-primary mt-2">Voir mes commandes</NuxtLink>
     </div>
 
     <div v-else class="flex flex-col items-center gap-4">
@@ -40,7 +40,7 @@
       <p class="text-ink/60">
         Nous n'avons pas encore reçu la confirmation finale. Vérifiez le statut de votre commande dans quelques instants.
       </p>
-      <NuxtLink to="/compte/commandes" class="btn-secondary mt-2">Voir mes commandes</NuxtLink>
+      <NuxtLink to="/commandes" class="btn-secondary mt-2">Voir mes commandes</NuxtLink>
     </div>
   </div>
 </template>
@@ -77,6 +77,11 @@ onMounted(async () => {
       const result = await getPaymentStatus(orderId);
       if (result.paymentStatus === 'PAID') {
         status.value = 'PAID';
+        sessionStorage.removeItem('pending_order_id');
+        break;
+      }
+      if (result.paymentStatus === 'FAILED') {
+        status.value = 'FAILED';
         sessionStorage.removeItem('pending_order_id');
         break;
       }

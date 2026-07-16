@@ -15,6 +15,9 @@ import { PaymentsModule } from './payments/payments.module';
 import { StorageModule } from './storage/storage.module';
 import { ConfigModule } from '@nestjs/config';
 import { ScheduleModule } from '@nestjs/schedule';
+import { EmbeddingsService } from './embeddings/embeddings.service';
+import { EmbeddingsModule } from './embeddings/embeddings.module';
+import { ChatModule } from './chat/chat.module';
 
 
 @Module({
@@ -37,7 +40,9 @@ import { ScheduleModule } from '@nestjs/schedule';
     ConfigModule.forRoot({
       isGlobal: true,
     }), StorageModule,
-    ScheduleModule.forRoot()
+    ScheduleModule.forRoot(),
+    EmbeddingsModule,
+    ChatModule
 
   ],
   providers: [
@@ -45,6 +50,7 @@ import { ScheduleModule } from '@nestjs/schedule';
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
     },
+    EmbeddingsService,
   ],
 })
 export class AppModule {}

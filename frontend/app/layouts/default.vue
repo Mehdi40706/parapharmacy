@@ -154,16 +154,21 @@
     </header>
 
     <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">
-      <slot />
-    </main>
+  <slot />
+</main>
 
-    <footer class="border-t border-mist py-8 text-center text-sm text-ink/60">
-      © 2026 Parapharmacie — Votre santé, notre priorité
-    </footer>
-  </div>
-</template>
+  <ChatWidget />
+
+  <footer class="border-t border-mist py-8 text-center text-sm text-ink/60">
+    © 2026 Parapharmacie — Votre santé, notre priorité
+  </footer>
+    </div>
+  </template>
 
 <script setup lang="ts">
+import ChatWidget from '~/components/chat/ChatWidget.vue';
+
+
 const authStore = useAuthStore();
 const cartStore = useCartStore();
 const router = useRouter();

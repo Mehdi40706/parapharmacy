@@ -24,6 +24,14 @@ export class ConfigService {
 	getFrontendUrl(): string {
 		return this.getRequired('FRONTEND_URL');
 	}
+	
+	getVoyageApiKey(): string {
+		return this.getRequired('VOYAGE_API_KEY');
+	}
+
+	getGroqApiKey(): string {
+    return this.getRequired('GROQ_API_KEY');
+}
 
 	private getRequired(key: string): string {
 		const value = process.env[key];
@@ -34,4 +42,7 @@ export class ConfigService {
 
 		return value;
 	}
+
+
+
 }

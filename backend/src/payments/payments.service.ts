@@ -16,6 +16,10 @@ export class PaymentsService {
     private prisma: PrismaService,
     private productsService: ProductsService,
   ) {
+     console.log('--- PaymentsService init ---');
+  console.log('KONNECT_API_URL:', process.env.KONNECT_API_URL);
+  console.log('KONNECT_API_KEY:', process.env.KONNECT_API_KEY);
+  console.log('KONNECT_WALLET_ID:', process.env.KONNECT_WALLET_ID);
     this.konnect = axios.create({
       baseURL: process.env.KONNECT_API_URL,
       headers: {
@@ -25,70 +29,66 @@ export class PaymentsService {
     });
   }
 
-  async createPayment(orderId: string, userId: string) {
-    const order = await this.prisma.order.findUnique({
-      where: { id: orderId },
-      include: { user: true, payments: true },
+async createPayment(orderId: string, userId: string) {
+  const order = await this.prisma.order.findUnique({
+    where: { id: orderId },
+    include: { user: true },
+  });
+
+  if (!order) throw new NotFoundException('Commande introuvable');
+  if (order.userId !== userId) {
+    throw new BadRequestException('Cette commande ne vous appartient pas');
+  }
+  if (order.paymentStatus === PaymentStatus.PAID) {
+    throw new BadRequestException('Cette commande est déjà payée');
+  }
+  if (order.status === OrderStatus.CANCELLED) {
+    throw new BadRequestException('Cette commande a expiré ou a été annulée');
+  }
+
+  // Toute tentative encore PENDING est invalidée avant d'en créer une nouvelle
+  await this.prisma.payment.updateMany({
+    where: { orderId: order.id, status: PaymentStatus.PENDING },
+    data: { status: PaymentStatus.FAILED },
+  });
+
+  const amountInMillimes = Math.round(Number(order.totalPrice) * 1000);
+
+  try {
+    const { data } = await this.konnect.post('/payments/init-payment', {
+      receiverWalletId: process.env.KONNECT_WALLET_ID,
+      token: 'TND',
+      amount: amountInMillimes,
+      type: 'immediate',
+      description: `Commande #${order.id.slice(0, 8)} - Parapharmacie`,
+      acceptedPaymentMethods: ['wallet', 'bank_card', 'e-DINAR'],
+      lifespan: 30,
+      checkoutForm: true,
+      firstName: order.user.firstName,
+      lastName: order.user.lastName,
+      email: order.user.email,
+      orderId: order.id,
+      webhook: `${process.env.BACKEND_URL}/payments/webhook`,
+      silentWebhook: true,
+      successUrl: `${process.env.FRONTEND_URL}/checkout/success?order_id=${order.id}`,
+      failUrl: `${process.env.FRONTEND_URL}/checkout/cancel?order_id=${order.id}`,
     });
 
-    if (!order) throw new NotFoundException('Commande introuvable');
-    if (order.userId !== userId) {
-      throw new BadRequestException('Cette commande ne vous appartient pas');
-    }
-    if (order.paymentStatus === PaymentStatus.PAID) {
-      throw new BadRequestException('Cette commande est déjà payée');
-    }
-    if (order.status === OrderStatus.CANCELLED) {
-      throw new BadRequestException('Cette commande a été annulée');
-    }
-
-    // Réutilise une tentative encore valide plutôt que d'en ouvrir une nouvelle à chaque appel
-    const pending = order.payments.find((p) => p.status === PaymentStatus.PENDING);
-    if (pending) {
-      return { paymentRef: pending.providerRef, reused: true };
-      // ou : appeler Konnect GET /payments/:ref pour renvoyer payUrl si tu veux permettre de reprendre le paiement
-    }
-
-    const amountInMillimes = Math.round(Number(order.totalPrice) * 1000);
-
-    try {
-      const { data } = await this.konnect.post('/payments/init-payment', {
-        receiverWalletId: process.env.KONNECT_WALLET_ID,
-        token: 'TND',
-        amount: amountInMillimes,
-        type: 'immediate',
-        description: `Commande #${order.id.slice(0, 8)} - Parapharmacie`,
-        acceptedPaymentMethods: ['wallet', 'bank_card', 'e-DINAR'],
-        lifespan: 30,
-        checkoutForm: true,
-        firstName: order.user.firstName,
-        lastName: order.user.lastName,
-        email: order.user.email,
+    await this.prisma.payment.create({
+      data: {
         orderId: order.id,
-        webhook: `${process.env.BACKEND_URL}/payments/webhook`,
-        silentWebhook: true,
-        successUrl: `${process.env.FRONTEND_URL}/checkout/success?order_id=${order.id}`,
-        failUrl: `${process.env.FRONTEND_URL}/checkout/cancel?order_id=${order.id}`,
-      });
+        providerRef: data.paymentRef,
+        amount: order.totalPrice,
+        status: PaymentStatus.PENDING,
+      },
+    });
 
-      await this.prisma.payment.create({
-        data: {
-          orderId: order.id,
-          providerRef: data.paymentRef,
-          amount: order.totalPrice,
-          status: PaymentStatus.PENDING,
-        },
-      });
-
-      return { payUrl: data.payUrl, paymentRef: data.paymentRef };
-    } catch (error) {
-      const message =
-        error instanceof Error ? error.message : JSON.stringify(error);
-      throw new BadRequestException(
-        `Erreur lors de l'initialisation du paiement Konnect: ${message}`,
-      );
-    }
+    return { payUrl: data.payUrl, paymentRef: data.paymentRef };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : JSON.stringify(error);
+    throw new BadRequestException(`Erreur lors de l'initialisation du paiement Konnect: ${message}`);
   }
+}
 
   async handleWebhook(paymentRef: string) {
     if (!paymentRef) throw new BadRequestException('payment_ref manquant');

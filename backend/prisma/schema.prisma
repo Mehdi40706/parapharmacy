@@ -32,7 +32,6 @@ enum PaymentMethod {
   COD
 }
 
-
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
@@ -83,6 +82,8 @@ model Product {
   orderItems        OrderItem[]
   createdAt         DateTime    @default(now())
   updatedAt         DateTime    @updatedAt
+  
+  embedding   Unsupported("vector(512)")?  // 512 = dimension de voyage-4-lite
 }
 
 model Order {

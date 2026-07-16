@@ -2,18 +2,18 @@ import { defineStore } from 'pinia';
 import type { User } from '~/types/user';
 
 export const useAuthStore = defineStore('auth', {
-  state: () => ({
-    user: null as User | null,
-  }),
+    state: () => ({
+      user: null as User | null,
+    }),
 
-  getters: {
-    accessToken: () => useCookie<string | null>('access_token').value,
-    refreshTokenValue: () => useCookie<string | null>('refresh_token').value,
-    isAuthenticated: (state) => !!useCookie('access_token').value,
-    isAdmin: (state) => state.user?.role === 'ADMIN',
-  },
+    getters: {
+      accessToken: () => useCookie<string | null>('access_token').value,
+      refreshTokenValue: () => useCookie<string | null>('refresh_token').value,
+      isAuthenticated: (state) => !!useCookie('access_token').value,
+      isAdmin: (state) => state.user?.role === 'ADMIN',
+    },
 
-  actions: {
+    actions: {
     setTokens(access: string, refresh: string) {
       useCookie('access_token', { maxAge: 60 * 15 }).value = access;
       useCookie('refresh_token', { maxAge: 60 * 60 * 24 * 7 }).value = refresh;
@@ -29,28 +29,30 @@ export const useAuthStore = defineStore('auth', {
         '/auth/register',
         { baseURL: config.public.apiBase, method: 'POST', body: payload },
       );
+      console.log('register response:', data);
       this.setTokens(data.access_token, data.refresh_token);
-      await this.fetchProfile();
+      await this.fetchProfile(data.access_token);
     },
+
     async fetchProfile(tokenOverride?: string) {
-  const config = useRuntimeConfig();
-  const token = tokenOverride || this.accessToken;
-  const user = await $fetch<User>('/auth/me', {
-    baseURL: config.public.apiBase,
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  this.setUser(user);
+      const config = useRuntimeConfig();
+      const token = tokenOverride || this.accessToken;
+      const user = await $fetch<User>('/auth/me', {
+        baseURL: config.public.apiBase,
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      this.setUser(user);
 },
 
-async login(email: string, password: string) {
-  const config = useRuntimeConfig();
-  const data = await $fetch<{ access_token: string; refresh_token: string }>(
-    '/auth/login',
-    { baseURL: config.public.apiBase, method: 'POST', body: { email, password } },
-  );
-  this.setTokens(data.access_token, data.refresh_token);
-  await this.fetchProfile(data.access_token); // ← passe le token directement, élimine tout doute de timing
-},
+    async login(email: string, password: string) {
+      const config = useRuntimeConfig();
+      const data = await $fetch<{ access_token: string; refresh_token: string }>(
+        '/auth/login',
+        { baseURL: config.public.apiBase, method: 'POST', body: { email, password } },
+      );
+      this.setTokens(data.access_token, data.refresh_token);
+      await this.fetchProfile(data.access_token);
+    },
 
 
     async refreshAccessToken(): Promise<boolean> {

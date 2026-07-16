@@ -270,8 +270,10 @@ const handlePayment = async () => {
   }
 
   processing.value = true;
+  let createdOrder;
+
   try {
-    const order = await createOrder({
+    createdOrder = await createOrder({
       items: cartStore.items.map((i) => ({ productId: i.product.id, quantity: i.quantity })),
       paymentMethod: paymentMethod.value,
       shippingAddress: {
@@ -282,22 +284,30 @@ const handlePayment = async () => {
         postalCode: shipping.postalCode.trim() || undefined,
       },
     });
-
-    cartStore.clear();
-
-    if (paymentMethod.value === 'ONLINE') {
-      // Konnect : on récupère l'URL de paiement et on redirige
-      const { payUrl } = await initiatePayment(order.id);
-      if (import.meta.client) sessionStorage.setItem('pending_order_id', order.id);
-      window.location.href = payUrl;
-    } else {
-      // Paiement à la livraison : pas de redirection externe, commande déjà confirmée
-      router.push({ path: '/checkout/success', query: { order_id: order.id, method: 'COD' } });
+      cartStore.clear();
     }
-  } catch (error: any) {
-    errorMessage.value =
-      error?.data?.message || 'Une erreur est survenue lors de la création de la commande';
-    processing.value = false;
+    catch (error: any) {
+      errorMessage.value = error?.data?.message || 'Impossible de créer la commande';
+      processing.value = false;
+      return;
   }
+      if (paymentMethod.value === 'COD') {
+        router.push({ path: '/checkout/success', query: { order_id: createdOrder.id, method: 'COD' } });
+        return;
+      }
+      try {
+        const { payUrl } = await initiatePayment(createdOrder.id);
+        if (import.meta.client) sessionStorage.setItem('pending_order_id', createdOrder.id);
+        window.location.href = payUrl;
+      } catch {
+        processing.value = false;
+        // Commande créée mais paiement non lancé -> on redirige vers une page dédiée
+        // qui permet de relancer le paiement sur CETTE commande, pas d'en recréer une
+        router.push({ path: '/checkout/retry', query: { order_id: createdOrder.id } });
+      }
 };
+
+
+
+
 </script>
