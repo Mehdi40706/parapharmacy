@@ -14,9 +14,15 @@ type HydrationStrategies = {
 type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {}, {}, { hydrated: () => void }> & T
 
 
+export const ChatInput: typeof import("../app/components/chat/ChatInput.vue")['default']
+export const ChatMessageBubble: typeof import("../app/components/chat/ChatMessageBubble.vue")['default']
+export const ChatSuggestionChip: typeof import("../app/components/chat/ChatSuggestionChip.vue")['default']
+export const ChatTypingIndicator: typeof import("../app/components/chat/ChatTypingIndicator.vue")['default']
+export const ChatWidget: typeof import("../app/components/chat/ChatWidget.vue")['default']
 export const OrderStatusBadge: typeof import("../app/components/order/OrderStatusBadge.vue")['default']
 export const ProductCard: typeof import("../app/components/product/ProductCard.vue")['default']
 export const ProductQuickViewModal: typeof import("../app/components/product/ProductQuickViewModal.vue")['default']
+export const UiFooter: typeof import("../app/components/ui/Footer.vue")['default']
 export const UiToastContainer: typeof import("../app/components/ui/ToastContainer.vue")['default']
 export const NuxtWelcome: typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']
 export const NuxtLayout: typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']
@@ -43,9 +49,15 @@ export const Head: typeof import("../node_modules/nuxt/dist/head/runtime/compone
 export const Html: typeof import("../node_modules/nuxt/dist/head/runtime/components")['Html']
 export const Body: typeof import("../node_modules/nuxt/dist/head/runtime/components")['Body']
 export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components/nuxt-island")['default']
+export const LazyChatInput: LazyComponent<typeof import("../app/components/chat/ChatInput.vue")['default']>
+export const LazyChatMessageBubble: LazyComponent<typeof import("../app/components/chat/ChatMessageBubble.vue")['default']>
+export const LazyChatSuggestionChip: LazyComponent<typeof import("../app/components/chat/ChatSuggestionChip.vue")['default']>
+export const LazyChatTypingIndicator: LazyComponent<typeof import("../app/components/chat/ChatTypingIndicator.vue")['default']>
+export const LazyChatWidget: LazyComponent<typeof import("../app/components/chat/ChatWidget.vue")['default']>
 export const LazyOrderStatusBadge: LazyComponent<typeof import("../app/components/order/OrderStatusBadge.vue")['default']>
 export const LazyProductCard: LazyComponent<typeof import("../app/components/product/ProductCard.vue")['default']>
 export const LazyProductQuickViewModal: LazyComponent<typeof import("../app/components/product/ProductQuickViewModal.vue")['default']>
+export const LazyUiFooter: LazyComponent<typeof import("../app/components/ui/Footer.vue")['default']>
 export const LazyUiToastContainer: LazyComponent<typeof import("../app/components/ui/ToastContainer.vue")['default']>
 export const LazyNuxtWelcome: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/welcome.vue")['default']>
 export const LazyNuxtLayout: LazyComponent<typeof import("../node_modules/nuxt/dist/app/components/nuxt-layout")['default']>

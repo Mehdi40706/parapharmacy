@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { ProductsService } from '../products/products.service';
 import { ConfigService } from '../config/config.service';
 import Groq from 'groq-sdk';
@@ -10,6 +10,7 @@ Règles impératives pour l'utilisation des outils :
 - Pour chercher des produits, tu dois TOUJOURS utiliser l'outil "search_products" en passant un objet JSON valide avec le paramètre "query".
 - Ne génère JAMAIS de balises XML ou HTML comme <function> ou <tool> dans tes réponses textuelles. Laisse l'infrastructure gérer l'appel.
 - Quand tu recommandes un produit trouvé, inclus toujours son lien sous la forme markdown [Nom du produit](/produits/ID).
+- Si la recherche ne retourne aucun résultat pertinent, dis-le simplement au client plutôt que d'inventer un produit.
 - Reste dans un rôle de conseil général : oriente vers un médecin pour tout symptôme sérieux, ne donne jamais de diagnostic.
 - Sois concis, chaleureux, et parle en français.`;
 
@@ -32,8 +33,11 @@ const SEARCH_PRODUCTS_TOOL = {
   },
 };
 
+const MAX_TOOL_ITERATIONS = 4;
+
 @Injectable()
 export class ChatService {
+  private readonly logger = new Logger(ChatService.name);
   private groq: Groq;
 
   constructor(
@@ -56,13 +60,23 @@ export class ChatService {
       })),
     ];
 
-    for (let i = 0; i < 4; i++) {
-      const response = await this.groq.chat.completions.create({
-        model: 'llama-3.3-70b-versatile', 
-        messages: conversation,
-        tools: [SEARCH_PRODUCTS_TOOL],
-        tool_choice: 'auto',
-      });
+    for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+      let response;
+      try {
+        response = await this.groq.chat.completions.create({
+          model: 'llama-3.3-70b-versatile',
+          messages: conversation,
+          tools: [SEARCH_PRODUCTS_TOOL],
+          tool_choice: 'auto',
+          temperature: 0.3,
+          max_tokens: 600,
+        });
+      } catch (error) {
+        this.logger.error('Appel Groq échoué', error);
+        return {
+          reply: "Désolé, une erreur technique m'empêche de répondre pour le moment. Réessaie dans un instant.",
+        };
+      }
 
       const message = response.choices[0].message;
       conversation.push(message);
@@ -72,30 +86,41 @@ export class ChatService {
         return { reply: message.content || '' };
       }
 
-      // Traitement des appels d'outils
-      for (const toolCall of message.tool_calls) {
-        if (toolCall.function.name === 'search_products') {
-          const args = JSON.parse(toolCall.function.arguments) as { query: string };
-          
-          // Recherche sémantique
-          const results = await this.productsService.semanticSearch(args.query, 5);
-          const formattedResults = results.map((p) => ({
-            id: p.id,
-            name: p.name,
-            price: Number(p.price),
-            description: p.description,
-            url: `/produits/${p.slug}`,
-          }));
+      // Traitement des appels d'outils en parallèle, chacun protégé individuellement
+      const toolResults = await Promise.all(
+        message.tool_calls.map(async (toolCall) => {
+          let formattedResults: any[] = [];
 
-          // Ajouter la réponse de l'outil à la conversation
-          conversation.push({
-            role: 'tool',
+          if (toolCall.function.name === 'search_products') {
+            try {
+              const args = JSON.parse(toolCall.function.arguments) as { query: string };
+              const results = await this.productsService.semanticSearch(args.query, 5);
+              formattedResults = results.map((p) => ({
+                id: p.id,
+                name: p.name,
+                price: Number(p.price),
+                description: p.description,
+                url: `/produits/${p.slug}`,
+              }));
+            } catch (error) {
+              this.logger.error(
+                `search_products a échoué pour les arguments: ${toolCall.function.arguments}`,
+                error,
+              );
+              formattedResults = [];
+            }
+          }
+
+          return {
+            role: 'tool' as const,
             tool_call_id: toolCall.id,
-            name: 'search_products',
+            name: toolCall.function.name,
             content: JSON.stringify(formattedResults),
-          });
-        }
-      }
+          };
+        }),
+      );
+
+      conversation.push(...toolResults);
     }
 
     return { reply: "Désolé, je n'ai pas pu formuler de réponse claire. Peux-tu reformuler ta question ?" };

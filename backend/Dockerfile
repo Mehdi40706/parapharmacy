@@ -1,3 +1,22 @@
+# ---- Étape dev : hot reload ----
+FROM node:20-alpine AS dev
+
+WORKDIR /app
+
+COPY package*.json ./
+RUN npm ci
+
+COPY . .
+ENV DATABASE_URL="postgresql://postgres:postgres@localhost:5432/parapharmacie_db?schema=public"
+
+
+RUN npx prisma generate
+
+EXPOSE 5000
+
+CMD ["npm", "run", "start:dev"]
+
+# ---- Étape 1 : build ----
 FROM node:20-alpine AS builder
 
 WORKDIR /app

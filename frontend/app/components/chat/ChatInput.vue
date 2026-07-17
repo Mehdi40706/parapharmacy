@@ -5,7 +5,7 @@
       v-model="draft"
       rows="1"
       placeholder="Décrivez ce que vous cherchez..."
-      class="flex-1 resize-none border border-mist rounded-xl px-3 py-2 text-sm max-h-28 focus:outline-none focus:ring-2 focus:ring-sage/30 focus:border-sage transition"
+      class="flex-1 resize-none border border-mist rounded-2xl px-3.5 py-2.5 text-sm max-h-28 placeholder:text-ink/40 focus:outline-none focus:ring-2 focus:ring-sage/25 focus:border-sage transition-[border-color,box-shadow,height] duration-150"
       :disabled="disabled"
       @keydown.enter.exact.prevent="handleSubmit"
       @input="autoGrow"
@@ -13,7 +13,7 @@
     <button
       type="submit"
       :disabled="disabled || !draft.trim()"
-      class="shrink-0 w-9 h-9 rounded-full bg-sage text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed hover:bg-sage-dark transition"
+      class="shrink-0 w-9 h-9 rounded-full bg-gradient-to-br from-sage to-sage-dark text-white flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed disabled:grayscale hover:scale-105 active:scale-95 transition-transform"
       aria-label="Envoyer"
     >
       <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">

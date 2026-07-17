@@ -116,7 +116,7 @@
         <div
           v-if="mobileMenuOpen"
           ref="mobileMenu"
-          class="md:hidden border-t border-mist bg-background px-4 py-8 flex flex-col gap-3"
+          class="md:hidden border-t border-mist bg-background px-4 py-3 flex flex-col gap-3"
         >
           <template v-if="authStore.isAuthenticated">
             <div class="px-4 py-4 border-b">
@@ -158,15 +158,13 @@
 </main>
 
   <ChatWidget />
-
-  <footer class="border-t border-mist py-8 text-center text-sm text-ink/60">
-    © 2026 Parapharmacie — Votre santé, notre priorité
-  </footer>
+<Footer/>
     </div>
   </template>
 
 <script setup lang="ts">
 import ChatWidget from '~/components/chat/ChatWidget.vue';
+import Footer from '~/components/ui/Footer.vue';
 
 
 const authStore = useAuthStore();

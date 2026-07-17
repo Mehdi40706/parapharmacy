@@ -29,6 +29,7 @@ declare global {
   const defineStore: typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables').defineStore
   const effect: typeof import('vue').effect
   const effectScope: typeof import('vue').effectScope
+  const getApiErrorMessage: typeof import('../../app/composables/useApi').getApiErrorMessage
   const getAppManifest: typeof import('../../node_modules/nuxt/dist/app/composables/manifest').getAppManifest
   const getCurrentInstance: typeof import('vue').getCurrentInstance
   const getCurrentScope: typeof import('vue').getCurrentScope
@@ -112,6 +113,8 @@ declare global {
   const useAuthStore: typeof import('../../app/stores/auth.store').useAuthStore
   const useCartStore: typeof import('../../app/stores/cart.store').useCartStore
   const useCategories: typeof import('../../app/composables/useCategories').useCategories
+  const useChat: typeof import('../../app/composables/useChat').useChat
+  const useChatStore: typeof import('../../app/stores/chat').useChatStore
   const useCookie: typeof import('../../node_modules/nuxt/dist/app/composables/cookie').useCookie
   const useCssModule: typeof import('vue').useCssModule
   const useCssVars: typeof import('vue').useCssVars
@@ -222,6 +225,9 @@ declare global {
   export type { ProductPayload } from '../../app/composables/useAdminProducts'
   import('../../app/composables/useAdminProducts')
   // @ts-ignore
+  export type { ChatMessage, ChatResponse } from '../../app/composables/useChat'
+  import('../../app/composables/useChat')
+  // @ts-ignore
   export type { CreateOrderPayload } from '../../app/composables/useOrders'
   import('../../app/composables/useOrders')
   // @ts-ignore
@@ -266,6 +272,7 @@ declare module 'vue' {
     readonly defineStore: UnwrapRef<typeof import('../../node_modules/@pinia/nuxt/dist/runtime/composables')['defineStore']>
     readonly effect: UnwrapRef<typeof import('vue')['effect']>
     readonly effectScope: UnwrapRef<typeof import('vue')['effectScope']>
+    readonly getApiErrorMessage: UnwrapRef<typeof import('../../app/composables/useApi')['getApiErrorMessage']>
     readonly getAppManifest: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/manifest')['getAppManifest']>
     readonly getCurrentInstance: UnwrapRef<typeof import('vue')['getCurrentInstance']>
     readonly getCurrentScope: UnwrapRef<typeof import('vue')['getCurrentScope']>
@@ -349,6 +356,8 @@ declare module 'vue' {
     readonly useAuthStore: UnwrapRef<typeof import('../../app/stores/auth.store')['useAuthStore']>
     readonly useCartStore: UnwrapRef<typeof import('../../app/stores/cart.store')['useCartStore']>
     readonly useCategories: UnwrapRef<typeof import('../../app/composables/useCategories')['useCategories']>
+    readonly useChat: UnwrapRef<typeof import('../../app/composables/useChat')['useChat']>
+    readonly useChatStore: UnwrapRef<typeof import('../../app/stores/chat')['useChatStore']>
     readonly useCookie: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/cookie')['useCookie']>
     readonly useCssModule: UnwrapRef<typeof import('vue')['useCssModule']>
     readonly useCssVars: UnwrapRef<typeof import('vue')['useCssVars']>
