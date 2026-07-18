@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Patch,
   Post,
+  Res,
   UseGuards,
 } from '@nestjs/common';
 import { Throttle } from '@nestjs/throttler';
@@ -22,12 +23,15 @@ import { ChangePasswordDto } from './dto/change-password.dto'
 import { GoogleAuthGuard } from './guards/google-auth.guard';
 import { FacebookAuthGuard } from './guards/facebook-auth.guard';
 import type { OAuthProfile } from './interfaces/oauth-profile.interface';
+import { ConfigService } from '../config/config.service';
+import { Response } from 'express';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private authService: AuthService,
     private usersService: UsersService,
+    private configService: ConfigService,
   ) {}
 
   @Post('register')
@@ -45,12 +49,28 @@ export class AuthController {
   @Get('google')
   googleAuth() {}
 
-  @UseGuards(GoogleAuthGuard)
+ @UseGuards(GoogleAuthGuard)
   @Get('google/callback')
-  googleAuthCallback(@CurrentUser() profile: OAuthProfile) {
-    return this.authService.socialLogin(profile);
-  }
+  async googleAuthCallback(
+    @CurrentUser() profile: OAuthProfile,
+    @Res() res
+  ) {
+    const frontendUrl = this.configService.getFrontendUrl();
 
+    try {
+      const tokens = await this.authService.socialLogin(profile);
+
+      const redirectUrl = new URL('/auth/callback', frontendUrl);
+      redirectUrl.searchParams.set('access_token', tokens.access_token);
+      redirectUrl.searchParams.set('refresh_token', tokens.refresh_token);
+
+      return res.redirect(redirectUrl.toString());
+    } catch (error) {
+      const errorUrl = new URL('/auth/login', frontendUrl);
+      errorUrl.searchParams.set('error', 'google_auth_failed');
+      return res.redirect(errorUrl.toString());
+    }
+  }
   @UseGuards(FacebookAuthGuard)
   @Get('facebook')
   facebookAuth() {}

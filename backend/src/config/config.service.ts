@@ -6,6 +6,18 @@ export class ConfigService {
 		return this.getRequired('JWT_SECRET');
 	}
 
+	getGoogleClientId(): string {
+		return this.getRequired('GOOGLE_CLIENT_ID');
+	}
+
+	getGoogleClientSecret(): string {
+		return this.getRequired('GOOGLE_CLIENT_SECRET');
+	}	
+
+	getGoogleCallbackUrl(): string {	
+		return this.getRequired('GOOGLE_CALLBACK_URL');
+	}
+
 	getDatabaseUrl(): string {
 		return this.getRequired('DATABASE_URL');
 	}
@@ -22,7 +34,7 @@ export class ConfigService {
 	}
 
 	getFrontendUrl(): string {
-		return this.getRequired('FRONTEND_URL');
+		return process.env.FRONTEND_URL ?? this.getRequired('FRONTEND_URL');
 	}
 	
 	getVoyageApiKey(): string {

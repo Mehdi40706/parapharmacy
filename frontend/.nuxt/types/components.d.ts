@@ -15,10 +15,12 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 
 interface _GlobalComponents {
   ChatInput: typeof import("../../app/components/chat/ChatInput.vue")['default']
-  ChatMessageBubble: typeof import("../../app/components/chat/ChatMessageBubble.vue")['default']
   ChatSuggestionChip: typeof import("../../app/components/chat/ChatSuggestionChip.vue")['default']
   ChatTypingIndicator: typeof import("../../app/components/chat/ChatTypingIndicator.vue")['default']
   ChatWidget: typeof import("../../app/components/chat/ChatWidget.vue")['default']
+  CommonActionsMenu: typeof import("../../app/components/common/ActionsMenu.vue")['default']
+  CommonActionsMenuItem: typeof import("../../app/components/common/ActionsMenuItem.vue")['default']
+  CommonConfirmModal: typeof import("../../app/components/common/ConfirmModal.vue")['default']
   OrderStatusBadge: typeof import("../../app/components/order/OrderStatusBadge.vue")['default']
   ProductCard: typeof import("../../app/components/product/ProductCard.vue")['default']
   ProductQuickViewModal: typeof import("../../app/components/product/ProductQuickViewModal.vue")['default']
@@ -50,10 +52,12 @@ interface _GlobalComponents {
   Body: typeof import("../../node_modules/nuxt/dist/head/runtime/components")['Body']
   NuxtIsland: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island")['default']
   LazyChatInput: LazyComponent<typeof import("../../app/components/chat/ChatInput.vue")['default']>
-  LazyChatMessageBubble: LazyComponent<typeof import("../../app/components/chat/ChatMessageBubble.vue")['default']>
   LazyChatSuggestionChip: LazyComponent<typeof import("../../app/components/chat/ChatSuggestionChip.vue")['default']>
   LazyChatTypingIndicator: LazyComponent<typeof import("../../app/components/chat/ChatTypingIndicator.vue")['default']>
   LazyChatWidget: LazyComponent<typeof import("../../app/components/chat/ChatWidget.vue")['default']>
+  LazyCommonActionsMenu: LazyComponent<typeof import("../../app/components/common/ActionsMenu.vue")['default']>
+  LazyCommonActionsMenuItem: LazyComponent<typeof import("../../app/components/common/ActionsMenuItem.vue")['default']>
+  LazyCommonConfirmModal: LazyComponent<typeof import("../../app/components/common/ConfirmModal.vue")['default']>
   LazyOrderStatusBadge: LazyComponent<typeof import("../../app/components/order/OrderStatusBadge.vue")['default']>
   LazyProductCard: LazyComponent<typeof import("../../app/components/product/ProductCard.vue")['default']>
   LazyProductQuickViewModal: LazyComponent<typeof import("../../app/components/product/ProductQuickViewModal.vue")['default']>

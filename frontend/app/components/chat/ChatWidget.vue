@@ -3,39 +3,35 @@
     <!-- Bouton flottant -->
     <button
       @click="handleToggle"
-      class="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 w-16 h-16 rounded-full bg-gradient-to-br from-sage via-sage to-sage-dark text-white shadow-xl shadow-sage-dark/30 flex items-center justify-center hover:scale-105 active:scale-95 transition-transform ring-4 ring-white/40"
-      :aria-label="chatStore.isOpen ? 'Fermer le chat' : 'Ouvrir le chat'"
+      class="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-40 flex items-center gap-2 bg-sage text-white shadow-lg shadow-ink/10 hover:shadow-xl hover:shadow-ink/15 active:scale-95 transition-all duration-200 focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-sage/40"
+      :class="chatStore.isOpen
+        ? 'w-14 h-14 rounded-full justify-center'
+        : 'h-14 pl-4 pr-5 rounded-full'"
+      style="margin-bottom: env(safe-area-inset-bottom, 0px);"
+      :aria-label="chatStore.isOpen ? 'Fermer le chat' : 'Ouvrir l\'assistant'"
     >
       <span
         v-if="hasUnread && !chatStore.isOpen"
-        class="absolute inset-0 rounded-full bg-sage animate-ping-slow"
+        class="absolute -top-1 -right-1 w-3.5 h-3.5 rounded-full bg-clay border-2 border-white"
         aria-hidden="true"
       />
 
       <Transition name="icon-swap" mode="out-in">
-        <svg v-if="!chatStore.isOpen" key="chat" xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 relative" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 2a4 4 0 00-4 4v2H6a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2v-9a2 2 0 00-2-2h-2V6a4 4 0 00-4-4zm-2 6V6a2 2 0 114 0v2h-4z" />
-        </svg>
-        <svg v-else key="close" xmlns="http://www.w3.org/2000/svg" class="w-6 h-6 relative" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-        </svg>
+        <div v-if="!chatStore.isOpen" key="open" class="flex items-center gap-2">
+          <Icon name="lucide:bot" class="w-5 h-5 shrink-0" />
+          <span class="text-sm font-medium whitespace-nowrap">Assistant</span>
+        </div>
+        <Icon v-else key="close" name="lucide:x" class="w-6 h-6" />
       </Transition>
-
-      <!-- Badge non-lu -->
-      <span
-        v-if="hasUnread"
-        class="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-clay border-2 border-white flex items-center justify-center"
-      >
-        <span class="w-1.5 h-1.5 rounded-full bg-white" />
-      </span>
     </button>
 
-    <!-- Panneau de conversation -->
-    <Transition name="panel">
-      <div
-        v-if="chatStore.isOpen"
-        class="fixed inset-0 sm:inset-auto sm:bottom-24 sm:right-6 z-40 sm:w-[400px] w-full h-full sm:h-[620px] sm:max-h-[calc(100vh-8rem)] bg-white sm:rounded-[28px] border border-mist shadow-2xl flex flex-col overflow-hidden"
-      >
+<!-- Panneau de conversation -->
+<Transition name="panel">
+  <div
+    v-if="chatStore.isOpen"
+    class="fixed bottom-24 right-4 left-4 sm:left-auto sm:right-6 z-40 sm:w-[400px] w-auto h-[70dvh] sm:h-[620px] max-h-[calc(100dvh-7rem)] sm:max-h-[calc(100vh-8rem)] bg-white rounded-[24px] sm:rounded-[28px] border border-mist shadow-2xl flex flex-col overflow-hidden"
+    style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);"
+  >
         <!-- Header -->
         <div class="relative bg-gradient-to-br from-sage to-sage-dark px-4 pt-4 pb-6 shrink-0 overflow-hidden">
           <!-- Motif décoratif en arrière-plan -->
@@ -53,9 +49,7 @@
           <div class="relative flex items-center justify-between">
             <div class="flex items-center gap-3">
               <div class="w-10 h-10 rounded-full bg-white/15 backdrop-blur-sm flex items-center justify-center ring-1 ring-white/25">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M12 2a4 4 0 00-4 4v2H6a2 2 0 00-2 2v9a2 2 0 002 2h12a2 2 0 002-2v-9a2 2 0 00-2-2h-2V6a4 4 0 00-4-4zm-2 6V6a2 2 0 114 0v2h-4z" />
-                </svg>
+                <Icon name="lucide:bot" class="w-5 h-5 text-white" />
               </div>
               <div>
                 <p class="font-medium text-sm text-white">Assistant Parapharmacie</p>
@@ -69,22 +63,18 @@
               <button
                 v-if="chatStore.messages.length > 0"
                 @click="chatStore.resetConversation()"
-                class="w-8 h-8 rounded-full flex items-center justify-center text-white/75 hover:text-white hover:bg-white/10 transition"
+                class="w-8 h-8 rounded-full flex items-center justify-center text-white/75 hover:text-white hover:bg-white/10 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 aria-label="Nouvelle conversation"
                 title="Nouvelle conversation"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
+                <Icon name="lucide:rotate-ccw" class="w-4 h-4" />
               </button>
               <button
                 @click="chatStore.toggleOpen()"
-                class="w-8 h-8 rounded-full flex items-center justify-center text-white/75 hover:text-white hover:bg-white/10 transition sm:hidden"
+                class="w-8 h-8 rounded-full flex items-center justify-center text-white/75 hover:text-white hover:bg-white/10 transition sm:hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
                 aria-label="Fermer"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
+                <Icon name="lucide:x" class="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -99,6 +89,7 @@
         <div class="relative flex-1 min-h-0">
           <div
             ref="scrollContainer"
+            @click="handleMessageClick"
             @scroll="handleScroll"
             class="h-full overflow-y-auto px-4 pb-4 pt-1 flex flex-col gap-3 bg-cream/40"
             role="log"
@@ -107,9 +98,7 @@
           >
             <div v-if="chatStore.messages.length === 0" class="flex flex-col items-center text-center gap-4 py-8">
               <div class="w-14 h-14 rounded-full bg-gradient-to-br from-sage/15 to-honey/20 flex items-center justify-center ring-1 ring-sage/10">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-sage-dark" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-                </svg>
+                <Icon name="lucide:sparkles" class="w-7 h-7 text-sage-dark" />
               </div>
               <p class="text-sm text-ink/60 max-w-[240px] leading-relaxed">
                 Bonjour ! Dites-moi ce que vous cherchez et je vous propose des produits adaptés.
@@ -127,6 +116,7 @@
                 :key="idx"
                 :role="msg.role"
                 :content="msg.content"
+                @reveal="handleReveal"
               />
             </TransitionGroup>
 
@@ -142,11 +132,9 @@
             <button
               v-if="showScrollToBottom"
               @click="scrollToBottom(true)"
-              class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-sage-dark text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-md hover:bg-sage transition-colors"
+              class="absolute bottom-3 left-1/2 -translate-x-1/2 flex items-center gap-1.5 bg-sage-dark text-white text-xs font-medium px-3 py-1.5 rounded-full shadow-md hover:bg-sage transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-sage-dark/50 focus-visible:ring-offset-2"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-              </svg>
+              <Icon name="lucide:arrow-down" class="w-3.5 h-3.5" />
               Nouveau message
             </button>
           </Transition>
@@ -161,6 +149,7 @@
 
 <script setup lang="ts">
 import { useChatStore } from '~/stores/chat.js';
+import ChatMessageBubble from './ChatMessageBubble.vue';
 
 const chatStore = useChatStore();
 const widgetRoot = ref<HTMLElement | null>(null);
@@ -189,6 +178,15 @@ const handleScroll = () => {
   isNearBottom.value = checkNearBottom();
   if (isNearBottom.value) {
     showScrollToBottom.value = false;
+  }
+};
+
+// Suit le scroll en continu pendant l'effet machine à écrire (mot par mot),
+// mais seulement si l'utilisateur est déjà proche du bas — on ne lui vole
+// jamais le contrôle s'il est en train de relire un message plus haut.
+const handleReveal = () => {
+  if (isNearBottom.value) {
+    scrollToBottom();
   }
 };
 
@@ -253,7 +251,19 @@ const handleClickOutside = (e: MouseEvent) => {
   }
 };
 
+const handleMessageClick = (e: MouseEvent) => {
+  const link = (e.target as HTMLElement).closest('a');
+  if (!link) return;
+
+  const href = link.getAttribute('href');
+  if (href && href.startsWith('/produits/')) {
+    e.preventDefault();
+    navigateTo(href); 
+  }
+};
+
 onMounted(() => {
+  chatStore.hydrate();
   window.addEventListener('keydown', handleKeydown);
   document.addEventListener('mousedown', handleClickOutside);
 });

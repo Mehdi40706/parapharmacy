@@ -8,7 +8,7 @@ import { UsersModule } from '../users/users.module';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { MailModule } from 'src/mail/mail.module';
 import { ConfigService } from '../config/config.service';
-//import { GoogleStrategy } from './strategies/google.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
 //import { FacebookStrategy } from './strategies/facebook.strategy';
 
 @Module({
@@ -25,7 +25,7 @@ import { ConfigService } from '../config/config.service';
       }),
     }),
   ],
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, GoogleStrategy],
   controllers: [AuthController],
   exports: [AuthService],
 })

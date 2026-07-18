@@ -104,53 +104,55 @@
         </div>
       </nav>
 
-      <!-- Menu mobile (drawer) -->
-      <Transition
-        enter-active-class="transition duration-200 ease-out"
-        enter-from-class="opacity-0 -translate-y-2"
-        enter-to-class="opacity-100 translate-y-0"
-        leave-active-class="transition duration-150 ease-in"
-        leave-from-class="opacity-100 translate-y-0"
-        leave-to-class="opacity-0 -translate-y-2"
+     <!-- Menu mobile (drawer) -->
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div
+        v-if="mobileMenuOpen"
+        ref="mobileMenu"
+        class="md:hidden absolute right-4 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-mist bg-white shadow-xl overflow-hidden z-50 flex flex-col"
       >
-        <div
-          v-if="mobileMenuOpen"
-          ref="mobileMenu"
-          class="md:hidden border-t border-mist bg-background px-4 py-3 flex flex-col gap-3"
-        >
-          <template v-if="authStore.isAuthenticated">
-            <div class="px-4 py-4 border-b">
-              <p class="font-semibold">
-                {{ authStore.user?.firstName }} {{ authStore.user?.lastName }}
-              </p>
-              <p class="text-sm text-gray-500">{{ authStore.user?.email }}</p>
-            </div>
-            <NuxtLink to="/compte" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50" @click="mobileMenuOpen = false">
-              <Icon name="heroicons:user-circle" class="w-5 h-5" />
-              Mon compte
-            </NuxtLink>
-            <NuxtLink to="/commandes" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50" @click="mobileMenuOpen = false">
-              <Icon name="heroicons:shopping-bag" class="w-5 h-5" />
-              Mes commandes
-            </NuxtLink>
-            <div class="border-t"></div>
-            <button @click="handleLogout" class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
-              <Icon name="heroicons:arrow-right-on-rectangle" class="w-5 h-5" />
-              Déconnexion
-            </button>
-          </template>
+        <template v-if="authStore.isAuthenticated">
+          <div class="px-4 py-4 border-b">
+            <p class="font-semibold">
+              {{ authStore.user?.firstName }} {{ authStore.user?.lastName }}
+            </p>
+            <p class="text-sm text-gray-500">{{ authStore.user?.email }}</p>
+          </div>
+          <NuxtLink to="/compte" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50" @click="mobileMenuOpen = false">
+            <Icon name="heroicons:user-circle" class="w-5 h-5" />
+            Mon compte
+          </NuxtLink>
+          <NuxtLink to="/commandes" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50" @click="mobileMenuOpen = false">
+            <Icon name="heroicons:shopping-bag" class="w-5 h-5" />
+            Mes commandes
+          </NuxtLink>
+          <div class="border-t"></div>
+          <button @click="handleLogout" class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
+            <Icon name="heroicons:arrow-right-on-rectangle" class="w-5 h-5" />
+            Déconnexion
+          </button>
+        </template>
 
-          <template v-else>
+        <template v-else>
+          <div class="p-3">
             <NuxtLink
               to="/auth/login"
-              class="btn-primary text-sm py-2 text-center"
+              class="btn-primary text-sm py-2 text-center block"
               @click="mobileMenuOpen = false"
             >
               Connexion
             </NuxtLink>
-          </template>
-        </div>
-      </Transition>
+          </div>
+        </template>
+      </div>
+    </Transition>
     </header>
 
     <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">

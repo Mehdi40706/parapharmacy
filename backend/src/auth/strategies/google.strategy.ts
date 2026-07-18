@@ -4,7 +4,7 @@ import { Strategy, Profile } from 'passport-google-oauth20';
 import { ConfigService } from '../../config/config.service';
 import { OAuthProfile } from '../interfaces/oauth-profile.interface';
 
-/*@Injectable()
+@Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor(configService: ConfigService) {
     super({
@@ -35,4 +35,4 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       avatarUrl: profile.photos?.[0]?.value,
     };
   }
-}*/
+}
