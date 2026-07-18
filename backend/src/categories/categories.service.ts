@@ -12,12 +12,14 @@ export class CategoriesService {
   constructor(private prisma: PrismaService) {}
 
   private slugify(name: string): string {
-    return name
+    const base = name
       .toLowerCase()
       .normalize('NFD')
-      .replace(/[\u0300-\u036f]/g, '') // enlève les accents
+      .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '');
+
+    return base || `categorie-${Date.now().toString(36)}`;
   }
 
   async findAll() {
@@ -52,12 +54,19 @@ export class CategoriesService {
   }
 
   async update(id: string, dto: UpdateCategoryDto) {
-    await this.findOne(id); // vérifie l'existence, throw 404 sinon
+    await this.findOne(id);
 
     const data: { name?: string; slug?: string } = {};
     if (dto.name) {
+      const slug = this.slugify(dto.name);
+
+      const existing = await this.prisma.category.findUnique({ where: { slug } });
+      if (existing && existing.id !== id) {
+        throw new ConflictException('Une catégorie avec ce nom existe déjà');
+      }
+
       data.name = dto.name;
-      data.slug = this.slugify(dto.name);
+      data.slug = slug;
     }
 
     return this.prisma.category.update({ where: { id }, data });
@@ -65,6 +74,17 @@ export class CategoriesService {
 
   async remove(id: string) {
     await this.findOne(id);
+
+    const productsCount = await this.prisma.product.count({
+      where: { categoryId: id },
+    });
+
+    if (productsCount > 0) {
+      throw new ConflictException(
+        `Impossible de supprimer cette catégorie : ${productsCount} produit(s) y sont rattachés.`,
+      );
+    }
+
     return this.prisma.category.delete({ where: { id } });
   }
 }

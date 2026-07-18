@@ -23,17 +23,29 @@
           </template>
           <template v-else>
             <button @click="startEdit(cat)" class="text-sage hover:underline">Modifier</button>
-            <button @click="handleDelete(cat.id)" class="text-clay hover:underline">Supprimer</button>
+            <button @click="askDelete(cat)" class="text-clay hover:underline">Supprimer</button>
           </template>
         </div>
       </div>
     </div>
+
+    <ConfirmModal
+      :open="!!categoryToDelete"
+      title="Supprimer la catégorie ?"
+      :loading="deleting"
+      @cancel="categoryToDelete = null"
+      @confirm="confirmDelete"
+    >
+      Cette action est irréversible. Voulez-vous vraiment supprimer
+      <span class="font-medium text-ink">{{ categoryToDelete?.name }}</span> ?
+    </ConfirmModal>
   </div>
 </template>
 
 <script setup lang="ts">
 definePageMeta({ layout: 'admin', middleware: 'admin' });
 
+import ConfirmModal from '~/components/common/ConfirmModal.vue';
 import { useToast } from '~/composables/useToast';
 import type { Category } from '~/types/product';
 
@@ -44,7 +56,9 @@ const categories = ref<Category[]>([]);
 const newName = ref('');
 const editingId = ref<string | null>(null);
 const editName = ref('');
-const toast=useToast();
+const categoryToDelete = ref<Category | null>(null);
+const deleting = ref(false);
+const toast = useToast();
 
 const load = async () => {
   categories.value = await fetchCategories();
@@ -53,9 +67,7 @@ const load = async () => {
 const handleCreate = async () => {
   try {
     await createCategory(newName.value);
-
-    toast.success(`Catégorie "${newName.value}" crée avec succès.`);
-
+    toast.success(`Catégorie "${newName.value}" créée avec succès.`);
     newName.value = '';
     await load();
   } catch (error: any) {
@@ -75,9 +87,7 @@ const startEdit = (cat: Category) => {
 const saveEdit = async (id: string) => {
   try {
     await updateCategory(id, editName.value);
-
     toast.success('Catégorie mise à jour avec succès.');
-
     editingId.value = null;
     await load();
   } catch (error: any) {
@@ -89,23 +99,30 @@ const saveEdit = async (id: string) => {
   }
 };
 
-const handleDelete = async (id: string) => {
-  if (!confirm('Supprimer cette catégorie ?')) return;
+const askDelete = (cat: Category) => {
+  categoryToDelete.value = cat;
+};
 
+const confirmDelete = async () => {
+  if (!categoryToDelete.value) return;
+
+  deleting.value = true;
   try {
-    await deleteCategory(id);
-
+    await deleteCategory(categoryToDelete.value.id);
     toast.success('Catégorie supprimée avec succès.');
-
+    categoryToDelete.value = null;
     await load();
   } catch (error: any) {
     toast.error(
       error?.data?.message ??
       error?.response?.data?.message ??
       'Une erreur est survenue.'
-  );
-  }   
-}
+    );
+    categoryToDelete.value = null;
+  } finally {
+    deleting.value = false;
+  }
+};
 
 onMounted(load);
 </script>

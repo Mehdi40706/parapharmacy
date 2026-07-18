@@ -1,4 +1,3 @@
-// embeddings.service.ts
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { ConfigService } from 'src/config/config.service'; 
@@ -6,12 +5,9 @@ import { ConfigService } from 'src/config/config.service';
 @Injectable()
 export class EmbeddingsService {
   private readonly baseURL = 'https://api.voyageai.com/v1/embeddings';
-
-  // 1. Inject your custom ConfigService
   constructor(private configService: ConfigService) {}
 
   private async request(input: string[], inputType: 'query' | 'document') {
-    // 2. Fetch key cleanly using your service
     const apiKey = this.configService.getVoyageApiKey();
 
     const { data } = await axios.post(

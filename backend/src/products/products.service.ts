@@ -1,5 +1,6 @@
 import {
   Injectable,
+  Logger,
   NotFoundException,
   ConflictException,
   BadRequestException,
@@ -13,12 +14,12 @@ import { EmbeddingsService } from 'src/embeddings/embeddings.service';
 
 @Injectable()
 export class ProductsService {
+  private readonly logger = new Logger(ProductsService.name);
   constructor(
     private prisma: PrismaService,
     private embeddingsService: EmbeddingsService,
   ) {}
 
-  // 1. Updated helper to accept the loaded category object safely
   private buildEmbeddingText(product: { 
     name: string; 
     description?: string | null; 
@@ -29,7 +30,7 @@ export class ProductsService {
       .join('. ');
   }
 
-private async updateEmbedding(productId: string) {
+  private async updateEmbedding(productId: string) {
     try {
       const product = await this.prisma.product.findUnique({ 
         where: { id: productId },
@@ -56,24 +57,42 @@ private async updateEmbedding(productId: string) {
 
       console.log(`[Embedding Success] Produit ${productId} mis à jour avec succès.`);
     } catch (error: unknown) {
-      // 1. Narrow the type of 'error' to safely read '.message'
       const errorMessage = error instanceof Error ? error.message : String(error);
-      
-      console.error(
-        `[Embedding Error] Échec de la génération/sauvegarde pour le produit ${productId}:`,
-        errorMessage
+      this.logger.error(
+        `Échec de la génération/sauvegarde d'embedding pour le produit ${productId}: ${errorMessage}`,
       );
-    }
-  }
+  }}
   private slugify(name: string): string {
-    return name
+    const base = name
       .toLowerCase()
       .normalize('NFD')
       .replace(/[\u0300-\u036f]/g, '')
       .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '');
-  }
+      .replace(/(^-|-$)/g, '')
+      .slice(0, 80); 
+  return base || `produit-${Date.now().toString(36)}`;
+}
 
+
+private async generateUniqueSlug(name: string, excludeId?: string): Promise<string> {
+  const base = this.slugify(name);
+  let candidate = base;
+  let suffix = 1;
+
+  while (true) {
+    const existing = await this.prisma.product.findUnique({
+      where: { slug: candidate },
+      select: { id: true },
+    });
+
+    if (!existing || existing.id === excludeId) {
+      return candidate;
+    }
+
+    suffix += 1;
+    candidate = `${base}-${suffix}`;
+  }
+}
   async findAll(query: QueryProductDto) {
     const {
       search,
@@ -174,8 +193,7 @@ private async updateEmbedding(productId: string) {
     return product;
   }
 
-  // 3. Cleaned async/await execution sequence
-  async create(dto: CreateProductDto) {
+    async create(dto: CreateProductDto) {
     const category = await this.prisma.category.findUnique({
       where: { id: dto.categoryId },
     });
@@ -183,29 +201,36 @@ private async updateEmbedding(productId: string) {
       throw new BadRequestException('Catégorie invalide');
     }
 
-    const slug = this.slugify(dto.name);
+    const slug = await this.generateUniqueSlug(dto.name);
 
-    // Explicitly await the database creation first
-    const product = await this.prisma.product.create({
-      data: {
-        name: dto.name,
-        slug,
-        description: dto.description,
-        price: dto.price,
-        stock: dto.stock ?? 0,
-        imageUrl: dto.imageUrl,
-        categoryId: dto.categoryId,
-        usageInstructions: dto.usageInstructions,
-      },
-      include: { category: true },
-    });
+    let product;
+    try {
+      product = await this.prisma.product.create({
+        data: {
+          name: dto.name,
+          slug,
+          description: dto.description,
+          price: dto.price,
+          stock: dto.stock ?? 0,
+          imageUrl: dto.imageUrl,
+          categoryId: dto.categoryId,
+          usageInstructions: dto.usageInstructions,
+        },
+        include: { category: true },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException(
+          'Un produit avec un nom très similaire existe déjà (conflit de slug).',
+        );
+      }
+      throw error;
+    }
 
-    // Run embedding update safely on the resolved entity
     await this.updateEmbedding(product.id);
     return product;
   }
 
-  // 4. Cleaned async/await update execution sequence
   async update(id: string, dto: UpdateProductDto) {
     await this.findOne(id);
 
@@ -217,23 +242,31 @@ private async updateEmbedding(productId: string) {
         throw new BadRequestException('Catégorie invalide');
       }
     }
-    
+
     const data: Prisma.ProductUpdateInput = { ...dto } as Prisma.ProductUpdateInput;
     if (dto.name) {
-      data.slug = this.slugify(dto.name);
+      data.slug = await this.generateUniqueSlug(dto.name);
     }
 
-    // Explicitly await the database update first
-    const product = await this.prisma.product.update({
-      where: { id },
-      data,
-      include: { category: true },
-    });
+    let product;
+    try {
+      product = await this.prisma.product.update({
+        where: { id },
+        data,
+        include: { category: true },
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException(
+          'Un autre produit utilise déjà un nom (slug) très similaire.',
+        );
+      }
+      throw error;
+    }
 
     await this.updateEmbedding(product.id);
     return product;
   }
-
   async archive(id: string) {
     await this.findOne(id);
 
@@ -336,10 +369,16 @@ private async updateEmbedding(productId: string) {
     }
   }
 
-  async semanticSearch(query: string, limit = 5) {
+  async semanticSearch(query: string, limit = 5, minSimilarity = 0.45) {
     const queryEmbedding = await this.embeddingsService.embedQuery(query);
+      // Garde-fou : s'assurer que l'embedding est bien un tableau de nombres
+    if (!queryEmbedding.every((n) => typeof n === 'number' && Number.isFinite(n))) {
+      throw new Error('Embedding invalide reçu de Voyage');
+    }
+
     const vectorLiteral = `[${queryEmbedding.join(',')}]`;
-    const results = await this.prisma.$queryRawUnsafe<
+    const oversampleLimit = limit * 4;
+    const rows = await this.prisma.$queryRawUnsafe<
       {
         id: string;
         name: string;
@@ -364,9 +403,12 @@ private async updateEmbedding(productId: string) {
       LIMIT $2
       `,
       vectorLiteral,
-      limit,
+      oversampleLimit,
     );
 
-    return results;
-  }
+    return rows
+    .map((r) => ({ ...r, similarity: 1 - r.distance }))
+    .filter((r) => r.similarity >= minSimilarity)
+    .slice(0, limit);
+}
 }

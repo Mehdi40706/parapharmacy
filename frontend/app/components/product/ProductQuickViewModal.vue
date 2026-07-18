@@ -81,31 +81,41 @@
                 </span>
               </div>
 
-              <div class="mt-auto flex items-center gap-3">
-                <div class="flex items-center border border-mist rounded-pill">
-                  <button @click="quantity > 1 && quantity--" class="w-10 h-10 flex items-center justify-center">−</button>
-                  <span class="w-8 text-center font-medium">{{ quantity }}</span>
-                  <button @click="quantity < product.stock && quantity++" class="w-10 h-10 flex items-center justify-center">+</button>
+              <!-- Ajout au panier : uniquement côté client -->
+              <template v-if="!isAdmin">
+                <div class="mt-auto flex items-center gap-3">
+                  <div class="flex items-center border border-mist rounded-pill">
+                    <button @click="quantity > 1 && quantity--" class="w-10 h-10 flex items-center justify-center">−</button>
+                    <span class="w-8 text-center font-medium">{{ quantity }}</span>
+                    <button @click="quantity < product.stock && quantity++" class="w-10 h-10 flex items-center justify-center">+</button>
+                  </div>
+
+                  <button
+                    @click="handleAdd"
+                    :disabled="product.stock === 0"
+                    class="btn-primary flex-1 flex items-center justify-center gap-2"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.994-4.735 2.573-7.273a1.125 1.125 0 0 0-1.11-1.313H5.106M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
+                    </svg>
+                    {{ added ? 'Ajouté ✓' : 'Ajouter au panier' }}
+                  </button>
                 </div>
 
-                <button
-                  @click="handleAdd"
-                  :disabled="product.stock === 0"
-                  class="btn-primary flex-1 flex items-center justify-center gap-2"
+                <NuxtLink
+                  :to="`/produits/${product.slug}`"
+                  class="text-xs text-center text-ink/40 hover:text-sage mt-4"
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.25 3h1.386c.51 0 .955.343 1.087.835l.383 1.437M7.5 14.25a3 3 0 0 0-3 3h15.75m-12.75-3h11.218c1.121-2.3 1.994-4.735 2.573-7.273a1.125 1.125 0 0 0-1.11-1.313H5.106M7.5 14.25 5.106 5.272M6 20.25a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Zm12.75 0a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z" />
-                  </svg>
-                  {{ added ? 'Ajouté ✓' : 'Ajouter au panier' }}
-                </button>
-              </div>
+                  Voir la page complète du produit →
+                </NuxtLink>
+              </template>
 
-              <NuxtLink
-                :to="`/produits/${product.slug}`"
-                class="text-xs text-center text-ink/40 hover:text-sage mt-4"
-              >
-                Voir la page complète du produit →
-              </NuxtLink>
+              <!-- Vue admin : juste l'état du stock, pas de mt-auto sans le bloc panier -->
+              <div v-else class="mt-auto pt-4 border-t border-mist">
+                <p class="text-xs text-ink/50">
+                  Stock disponible : <span class="font-medium text-ink">{{ product.stock }}</span>
+                </p>
+              </div>
             </div>
           </div>
         </Transition>
@@ -117,7 +127,10 @@
 <script setup lang="ts">
 import type { Product } from '~/types/product';
 
-const props = defineProps<{ product: Product | null }>();
+const props = withDefaults(
+  defineProps<{ product: Product | null; isAdmin?: boolean }>(),
+  { isAdmin: false },
+);
 const emit = defineEmits<{ close: [] }>();
 
 const cartStore = useCartStore();
