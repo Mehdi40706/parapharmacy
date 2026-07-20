@@ -2,9 +2,7 @@
   <div>
     <div class="flex items-center justify-between mb-6">
       <h1 class="text-2xl sm:text-3xl font-semibold">Mes commandes</h1>
-      <NuxtLink to="/compte" class="text-sm text-sage hover:underline">
-        ← Mon profil
-      </NuxtLink>
+      <BackButton label="Retour" class="mb-6" />
     </div>
 
     <!-- Filtres statut -->
@@ -134,6 +132,7 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' });
 
+import BackButton from '~/components/common/BackButton.vue';
 import { useToast } from '~/composables/useToast';
 import type { Order } from '~/types/order';
 

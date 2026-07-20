@@ -16,16 +16,43 @@
         </div>
         <input v-else v-model="editName" class="input-field text-sm max-w-xs" />
 
-        <div class="flex gap-3 text-sm">
-          <template v-if="editingId === cat.id">
-            <button @click="saveEdit(cat.id)" class="text-sage hover:underline">Sauvegarder</button>
-            <button @click="editingId = null" class="text-ink/50 hover:underline">Annuler</button>
-          </template>
-          <template v-else>
-            <button @click="startEdit(cat)" class="text-sage hover:underline">Modifier</button>
-            <button @click="askDelete(cat)" class="text-clay hover:underline">Supprimer</button>
-          </template>
-        </div>
+        <div class="flex items-center gap-2">
+  <template v-if="editingId === cat.id">
+    <button
+      @click="saveEdit(cat.id)"
+      class="inline-flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm font-medium text-emerald-600 transition-all duration-200 hover:bg-emerald-100 hover:shadow-sm"
+    >
+      <Icon name="lucide:check" class="w-4 h-4" />
+      <span>Sauvegarder</span>
+    </button>
+
+    <button
+      @click="editingId = null"
+      class="inline-flex items-center gap-2 rounded-lg bg-slate-100 px-3 py-2 text-sm font-medium text-slate-600 transition-all duration-200 hover:bg-slate-200 hover:shadow-sm"
+    >
+      <Icon name="lucide:x" class="w-4 h-4" />
+      <span>Annuler</span>
+    </button>
+  </template>
+
+  <template v-else>
+    <button
+      @click="startEdit(cat)"
+      class="inline-flex items-center gap-2 rounded-lg bg-sky-50 px-3 py-2 text-sm font-medium text-sky-600 transition-all duration-200 hover:bg-sky-100 hover:shadow-sm"
+    >
+      <Icon name="lucide:pencil" class="w-4 h-4" />
+      <span>Modifier</span>
+    </button>
+
+    <button
+      @click="askDelete(cat)"
+      class="inline-flex items-center gap-2 rounded-lg bg-red-50 px-3 py-2 text-sm font-medium text-red-600 transition-all duration-200 hover:bg-red-100 hover:shadow-sm"
+    >
+      <Icon name="lucide:trash-2" class="w-4 h-4" />
+      <span>Supprimer</span>
+    </button>
+  </template>
+</div>
       </div>
     </div>
 

@@ -1,5 +1,6 @@
 <template>
   <div class="max-w-2xl mx-auto">
+    <BackButton label="Retour" class="mb-6" />
     <h1 class="text-3xl font-semibold mb-8">Finaliser la commande</h1>
 
     <div v-if="cartStore.isEmpty" class="text-center py-20">
@@ -189,6 +190,7 @@
 </template>
 
 <script setup lang="ts">
+import BackButton from '~/components/common/BackButton.vue';
 import { useToast } from '~/composables/useToast';
 
 definePageMeta({ middleware: 'auth' });

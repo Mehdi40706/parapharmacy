@@ -15,26 +15,34 @@
       </div>
 
       <div class="mt-6 grid gap-4 xl:grid-cols-4">
-        <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-sage/10 to-white p-5">
-          <p class="text-sm text-ink/60">Produits</p>
-          <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.products }}</p>
-          <p class="mt-2 text-sm text-ink/60">Articles disponibles en boutique</p>
-        </div>
-        <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-honey/20 to-white p-5">
-          <p class="text-sm text-ink/60">Commandes</p>
-          <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.orders }}</p>
-          <p class="mt-2 text-sm text-ink/60">Total des commandes enregistrées</p>
-        </div>
-        <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-clay/10 to-white p-5">
-          <p class="text-sm text-ink/60">Utilisateurs</p>
-          <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.users }}</p>
-          <p class="mt-2 text-sm text-ink/60">Comptes actifs dans la plateforme</p>
-        </div>
-        <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-clay/20 to-white p-5">
-          <p class="text-sm text-ink/60">Categories</p>
-          <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.categories }}</p>
-          <p class="mt-2 text-sm text-ink/60">Total des catégories dans la plateforme</p>
-        </div>
+        <NuxtLink to='/admin/produits'>
+          <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-sage/10 to-white p-5">
+            <p class="text-sm text-ink/60">Produits</p>
+            <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.products }}</p>
+            <p class="mt-2 text-sm text-ink/60">Articles disponibles en boutique</p>
+          </div>
+        </NuxtLink>
+        <NuxtLink to='/admin/commandes'>  
+          <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-honey/20 to-white p-5">
+            <p class="text-sm text-ink/60">Commandes</p>
+            <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.orders }}</p>
+            <p class="mt-2 text-sm text-ink/60">Total des commandes enregistrées</p>
+          </div>
+        </NuxtLink>
+        <NuxtLink to='/admin/utilisateurs'>  
+          <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-clay/10 to-white p-5">
+            <p class="text-sm text-ink/60">Utilisateurs</p>
+            <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.users }}</p>
+            <p class="mt-2 text-sm text-ink/60">Comptes actifs dans la plateforme</p>
+          </div>
+        </NuxtLink>  
+        <NuxtLink to='/admin/categories'>  
+          <div class="rounded-[1.5rem] border border-mist bg-gradient-to-br from-clay/20 to-white p-5">
+            <p class="text-sm text-ink/60">Categories</p>
+            <p class="mt-3 text-3xl font-semibold text-sage-dark">{{ stats.categories }}</p>
+            <p class="mt-2 text-sm text-ink/60">Total des catégories dans la plateforme</p>
+          </div>
+        </NuxtLink>
       </div>
     </section>
 

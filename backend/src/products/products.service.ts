@@ -218,6 +218,7 @@ private async generateUniqueSlug(name: string, excludeId?: string): Promise<stri
         },
         include: { category: true },
       });
+      
     } catch (error) {
       if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
         throw new ConflictException(

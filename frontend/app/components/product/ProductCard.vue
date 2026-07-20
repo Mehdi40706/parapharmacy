@@ -1,36 +1,41 @@
 <template>
   <div class="group flex flex-col h-full bg-white rounded-xl sm:rounded-2xl border border-mist overflow-hidden hover:shadow-md transition-shadow duration-200">
-    <!-- Image -->
-    <div class="aspect-[4/3] bg-mist relative overflow-hidden">
-      <img
-        v-if="product.imageUrl"
-        :src="product.imageUrl"
-        :alt="product.name"
-        class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
-      />
-      <div v-else class="w-full h-full flex items-center justify-center text-ink/20">
-        <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 sm:w-12 sm:h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76ZM16 8l-6 6" />
-        </svg>
+    <NuxtLink
+      :to="`/produits/${product.slug}`"
+      class="flex flex-col flex-1"
+      >
+      <!-- Image -->
+      <div class="aspect-[4/3] bg-mist relative overflow-hidden">
+        <img
+          v-if="product.imageUrl"
+          :src="product.imageUrl"
+          :alt="product.name"
+          class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+        />
+        <div v-else class="w-full h-full flex items-center justify-center text-ink/20">
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 sm:w-12 sm:h-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.24 12.24a6 6 0 0 0-8.49-8.49L5 10.5V19h8.5l6.74-6.76ZM16 8l-6 6" />
+          </svg>
+        </div>
+
+        <span class="badge-pill absolute top-2 left-2 sm:top-3 sm:left-3 bg-ink/80 text-white backdrop-blur-sm text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1">
+          {{ product.category.name }}
+        </span>
+
+        <span
+          v-if="product.stock === 0"
+          class="badge-pill absolute top-2 right-2 sm:top-3 sm:right-3 bg-clay text-white text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1"
+        >
+          Rupture
+        </span>
+        <span
+          v-else
+          class="badge-pill absolute top-2 right-2 sm:top-3 sm:right-3 bg-sage text-white text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1"
+        >
+          En stock
+        </span>
       </div>
-
-      <span class="badge-pill absolute top-2 left-2 sm:top-3 sm:left-3 bg-ink/80 text-white backdrop-blur-sm text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1">
-        {{ product.category.name }}
-      </span>
-
-      <span
-        v-if="product.stock === 0"
-        class="badge-pill absolute top-2 right-2 sm:top-3 sm:right-3 bg-clay text-white text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1"
-      >
-        Rupture
-      </span>
-      <span
-        v-else
-        class="badge-pill absolute top-2 right-2 sm:top-3 sm:right-3 bg-sage text-white text-[10px] sm:text-xs px-2 py-0.5 sm:px-2.5 sm:py-1"
-      >
-        En stock
-      </span>
-    </div>
+    </NuxtLink>
 
     <!-- Contenu -->
     <div class="p-3 sm:p-4 flex flex-col gap-1 sm:gap-1.5 flex-1">
@@ -45,7 +50,6 @@
       <p class="text-xs sm:text-sm text-ink/60 line-clamp-2">
         {{ product.description }}
       </p>
-
       <div class="mt-auto pt-2 sm:pt-3 flex items-center justify-between gap-2 sm:gap-3 flex-wrap">
         <div class="min-w-0">
           <span class="text-[10px] sm:text-[11px] text-ink/40 block uppercase tracking-wide">Prix</span>
@@ -63,7 +67,6 @@
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
             </svg>
           </button>
-
           <button
             @click="handleQuickAdd"
             :disabled="product.stock === 0"
@@ -80,6 +83,7 @@
         </div>
       </div>
     </div>
+
   </div>
 </template>
 

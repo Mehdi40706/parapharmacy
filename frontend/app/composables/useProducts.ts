@@ -12,7 +12,6 @@ export interface ProductQuery {
   limit?: number;
 }
 
-// Normalise les champs Decimal (renvoyés en string par Prisma) en number
 const normalizeProduct = (p: any): Product => ({
   ...p,
   price: Number(p.price),

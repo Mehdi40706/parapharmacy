@@ -37,6 +37,7 @@ export { useAdminOrders } from '../app/composables/useAdminOrders';
 export { useAdminProducts, ProductPayload } from '../app/composables/useAdminProducts';
 export { useAdminUsers } from '../app/composables/useAdminUsers';
 export { useApi, getApiErrorMessage } from '../app/composables/useApi';
+export { useAuth, ForgotPasswordPayload, ResetPasswordPayload } from '../app/composables/useAuth';
 export { useCategories } from '../app/composables/useCategories';
 export { useChat, ChatMessage, ChatResponse } from '../app/composables/useChat';
 export { useOrders, CreateOrderPayload } from '../app/composables/useOrders';

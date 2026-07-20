@@ -2,19 +2,23 @@ import {
   Injectable,
   BadRequestException,
   NotFoundException,
+  Logger
 } from '@nestjs/common';
 import axios, { AxiosInstance } from 'axios';
 import { PrismaService } from '../database/prisma/prisma.service';
 import { OrderStatus, PaymentStatus } from '@prisma/client';
 import { ProductsService } from 'src/products/products.service';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class PaymentsService {
   private konnect: AxiosInstance;
+  private readonly logger = new Logger();
 
   constructor(
     private prisma: PrismaService,
     private productsService: ProductsService,
+    private mailService: MailService
   ) {
      console.log('--- PaymentsService init ---');
   console.log('KONNECT_API_URL:', process.env.KONNECT_API_URL);
@@ -90,58 +94,80 @@ async createPayment(orderId: string, userId: string) {
   }
 }
 
-  async handleWebhook(paymentRef: string) {
-    if (!paymentRef) throw new BadRequestException('payment_ref manquant');
+async handleWebhook(paymentRef: string) {
+  if (!paymentRef) throw new BadRequestException('payment_ref manquant');
 
-    const payment = await this.prisma.payment.findUnique({
-      where: { providerRef: paymentRef },
-      include: { order: { include: { items: true } } },
-    });
-    if (!payment) {
-      throw new NotFoundException('Paiement introuvable pour cette référence');
-    }
-
-    // Idempotence : déjà traité, on ne refait rien
-    if (payment.status !== PaymentStatus.PENDING) {
-      return { received: true, alreadyProcessed: true };
-    }
-
-    const { data } = await this.konnect.get(`/payments/${paymentRef}`);
-    const konnectStatus = data.payment.status;
-
-    if (konnectStatus === 'completed') {
-      await this.prisma.$transaction(async (tx) => {
-        for (const item of payment.order.items) {
-          await this.productsService.confirmStock(item.productId, item.quantity, tx);
-        }
-        await tx.payment.update({
-          where: { id: payment.id },
-          data: { status: PaymentStatus.PAID, rawResponse: data },
-        });
-        await tx.order.update({
-          where: { id: payment.orderId },
-          data: { paymentStatus: PaymentStatus.PAID, status: OrderStatus.CONFIRMED },
-        });
-      });
-    } else if (konnectStatus === 'failed' || konnectStatus === 'expired') {
-      await this.prisma.$transaction(async (tx) => {
-        for (const item of payment.order.items) {
-          await this.productsService.releaseStock(item.productId, item.quantity, tx);
-        }
-        await tx.payment.update({
-          where: { id: payment.id },
-          data: { status: PaymentStatus.FAILED, rawResponse: data },
-        });
-        await tx.order.update({
-          where: { id: payment.orderId },
-          data: { paymentStatus: PaymentStatus.FAILED, status: OrderStatus.CANCELLED },
-        });
-      });
-    }
-    // "pending" : on ne touche à rien
-
-    return { received: true };
+  const payment = await this.prisma.payment.findUnique({
+    where: { providerRef: paymentRef },
+    include: {
+      order: {
+        include: {
+          items: { include: { product: true } }, // 👈 product ajouté pour le nom dans l'email
+          user: true, // 👈 nécessaire pour payment.order.user.email
+        },
+      },
+    },
+  });
+  if (!payment) {
+    throw new NotFoundException('Paiement introuvable pour cette référence');
   }
+
+  if (payment.status !== PaymentStatus.PENDING) {
+    return { received: true, alreadyProcessed: true };
+  }
+
+  const { data } = await this.konnect.get(`/payments/${paymentRef}`);
+  const konnectStatus = data.payment.status;
+
+  if (konnectStatus === 'completed') {
+    await this.prisma.$transaction(async (tx) => {
+      for (const item of payment.order.items) {
+        await this.productsService.confirmStock(item.productId, item.quantity, tx);
+      }
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: PaymentStatus.PAID, rawResponse: data },
+      });
+      await tx.order.update({
+        where: { id: payment.orderId },
+        data: { paymentStatus: PaymentStatus.PAID, status: OrderStatus.CONFIRMED },
+      });
+    });
+
+    // Hors transaction, même logique que pour COD
+    this.mailService
+      .sendOrderConfirmationEmail(payment.order.user.email, {
+        id: payment.order.id,
+        totalPrice: Number(payment.order.totalPrice),
+        paymentMethod: payment.order.paymentMethod,
+        items: payment.order.items.map((item) => ({
+          name: item.product.name,
+          quantity: item.quantity,
+          price: Number(item.price),
+        })),
+        shippingAddress: payment.order.shippingAddress,
+        shippingCity: payment.order.shippingCity,
+      })
+      .catch((err) => this.logger.error('Échec envoi confirmation commande', err));
+  } else if (konnectStatus === 'failed' || konnectStatus === 'expired') {
+    await this.prisma.$transaction(async (tx) => {
+      for (const item of payment.order.items) {
+        await this.productsService.releaseStock(item.productId, item.quantity, tx);
+      }
+      await tx.payment.update({
+        where: { id: payment.id },
+        data: { status: PaymentStatus.FAILED, rawResponse: data },
+      });
+      await tx.order.update({
+        where: { id: payment.orderId },
+        data: { paymentStatus: PaymentStatus.FAILED, status: OrderStatus.CANCELLED },
+      });
+    });
+  }
+  // "pending" : on ne touche à rien
+
+  return { received: true };
+}
 
   async getPaymentStatus(orderId: string, userId: string) {
     const order = await this.prisma.order.findUnique({ where: { id: orderId } });

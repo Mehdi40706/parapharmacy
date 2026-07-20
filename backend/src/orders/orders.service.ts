@@ -3,27 +3,33 @@ import {
   NotFoundException,
   BadRequestException,
   ForbiddenException,
+  Logger
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { PrismaService } from '../database/prisma/prisma.service';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { QueryOrderDto } from './dto/query-order.dto';
 import { OrderStatus } from '@prisma/client';
+import { MailService } from 'src/mail/mail.service';
 
 @Injectable()
 export class OrdersService {
-  constructor(private prisma: PrismaService) {}
+  private readonly logger = new Logger(OrdersService.name);
+  constructor(
+    private prisma: PrismaService,
+    private mailService: MailService,
+  ) {}
 
 async create(userId: string, dto: CreateOrderDto) {
-  return this.prisma.$transaction(async (tx) => {
+  const isCod = dto.paymentMethod === 'COD';
+
+  const order = await this.prisma.$transaction(async (tx) => {
     let totalPrice = new Prisma.Decimal(0);
     const itemsData: {
       productId: string;
       quantity: number;
       price: Prisma.Decimal;
     }[] = [];
-
-    const isCod = dto.paymentMethod === 'COD';
 
     for (const item of dto.items) {
       const product = await tx.product.findUnique({
@@ -38,7 +44,6 @@ async create(userId: string, dto: CreateOrderDto) {
       }
 
       if (isCod) {
-        // COD : décrémentation réelle et immédiate, atomique
         const result = await tx.product.updateMany({
           where: { id: product.id, stock: { gte: item.quantity } },
           data: { stock: { decrement: item.quantity } },
@@ -49,7 +54,6 @@ async create(userId: string, dto: CreateOrderDto) {
           );
         }
       } else {
-        // ONLINE : réservation uniquement, stock réel intact
         const reserved = await tx.$executeRaw`
           UPDATE "Product"
           SET "reservedStock" = "reservedStock" + ${item.quantity}
@@ -86,9 +90,32 @@ async create(userId: string, dto: CreateOrderDto) {
         shippingPostalCode: dto.shippingAddress.postalCode,
         items: { create: itemsData },
       },
-      include: { items: { include: { product: true } } },
+      include: {
+        items: { include: { product: true } },
+        user: true, 
+      },
     });
   });
+
+  // Hors transaction : un email raté ne doit jamais affecter la commande déjà créée en base
+  if (isCod) {
+    this.mailService
+      .sendOrderConfirmationEmail(order.user.email, {
+        id: order.id,
+        totalPrice: Number(order.totalPrice),
+        paymentMethod: order.paymentMethod,
+        items: order.items.map((item) => ({
+          name: item.product.name,
+          quantity: item.quantity,
+          price: Number(item.price),
+        })),
+        shippingAddress: order.shippingAddress,
+        shippingCity: order.shippingCity,
+      })
+      .catch((err) => this.logger.error('Échec envoi confirmation commande', err));
+  }
+
+  return order;
 }
   async findAllForUser(userId: string, query: QueryOrderDto) {
     const { status, page = 1, limit = 20 } = query;

@@ -110,6 +110,7 @@ declare global {
   const useAppConfig: typeof import('../../node_modules/nuxt/dist/app/config').useAppConfig
   const useAsyncData: typeof import('../../node_modules/nuxt/dist/app/composables/asyncData').useAsyncData
   const useAttrs: typeof import('vue').useAttrs
+  const useAuth: typeof import('../../app/composables/useAuth').useAuth
   const useAuthStore: typeof import('../../app/stores/auth.store').useAuthStore
   const useCartStore: typeof import('../../app/stores/cart.store').useCartStore
   const useCategories: typeof import('../../app/composables/useCategories').useCategories
@@ -224,6 +225,9 @@ declare global {
   // @ts-ignore
   export type { ProductPayload } from '../../app/composables/useAdminProducts'
   import('../../app/composables/useAdminProducts')
+  // @ts-ignore
+  export type { ForgotPasswordPayload, ResetPasswordPayload } from '../../app/composables/useAuth'
+  import('../../app/composables/useAuth')
   // @ts-ignore
   export type { ChatMessage, ChatResponse } from '../../app/composables/useChat'
   import('../../app/composables/useChat')
@@ -353,6 +357,7 @@ declare module 'vue' {
     readonly useAppConfig: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/config')['useAppConfig']>
     readonly useAsyncData: UnwrapRef<typeof import('../../node_modules/nuxt/dist/app/composables/asyncData')['useAsyncData']>
     readonly useAttrs: UnwrapRef<typeof import('vue')['useAttrs']>
+    readonly useAuth: UnwrapRef<typeof import('../../app/composables/useAuth')['useAuth']>
     readonly useAuthStore: UnwrapRef<typeof import('../../app/stores/auth.store')['useAuthStore']>
     readonly useCartStore: UnwrapRef<typeof import('../../app/stores/cart.store')['useCartStore']>
     readonly useCategories: UnwrapRef<typeof import('../../app/composables/useCategories')['useCategories']>

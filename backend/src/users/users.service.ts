@@ -127,4 +127,10 @@ async updateRole(id: string, role: 'CLIENT' | 'ADMIN') {
     select: { id: true, email: true, role: true },
   });
 }
+
+async deleteUser(id: string) {
+  return this.prisma.user.delete({
+    where: {id}
+  });
+}
 }

@@ -10,5 +10,8 @@ export const useAdminUsers = () => {
   const updateUserRole = (id: string, role: 'CLIENT' | 'ADMIN') =>
     api(`/users/${id}/role`, { method: 'PATCH', body: { role } });
 
-  return { fetchUsers, updateUserRole };
+  const deleteUser = (id: string) => 
+    api(`/users/${id}`, { method: 'DELETE' });
+
+  return { fetchUsers, updateUserRole, deleteUser };
 };

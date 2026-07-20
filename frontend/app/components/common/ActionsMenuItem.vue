@@ -1,14 +1,30 @@
 <template>
   <button
     @click="$emit('click')"
-    class="w-full text-left px-4 py-2 text-sm hover:bg-mist transition-colors"
-    :class="danger ? 'text-clay' : 'text-ink'"
+    class="group flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-all duration-200"
+    :class="danger
+      ? 'text-red-600 hover:bg-red-50'
+      : 'text-slate-700 hover:bg-slate-100'"
   >
-    {{ label }}
+    <Icon
+      :name="icon"
+      class="h-4 w-4 transition-transform duration-200 group-hover:scale-110"
+    />
+
+    <span class="flex-1 text-left">
+      {{ label }}
+    </span>
   </button>
 </template>
 
 <script setup lang="ts">
-defineProps<{ label: string; danger?: boolean }>();
-defineEmits<{ click: [] }>();
+defineProps<{
+  label: string
+  icon: string
+  danger?: boolean
+}>()
+
+defineEmits<{
+  click: []
+}>()
 </script>

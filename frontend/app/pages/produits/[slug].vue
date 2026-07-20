@@ -1,5 +1,6 @@
 <template>
   <div v-if="product">
+    <BackButton label="Retour" class="mb-6" />
     <div class="grid md:grid-cols-2 gap-8 lg:gap-12">
       <!-- Image -->
       <div class="aspect-square bg-mist rounded-2xl overflow-hidden">
@@ -84,12 +85,14 @@
 </template>
 
 <script setup lang="ts">
+import BackButton from '~/components/common/BackButton.vue';
 import { useProducts } from '~/composables/useProducts';
 import type { Product } from '~/types/product';
 
 const route = useRoute();
 const { fetchProductBySlug } = useProducts();
 const cartStore = useCartStore();
+const authStore = useAuthStore();
 
 const product = ref<Product | null>(null);
 const loading = ref(true);
@@ -98,6 +101,9 @@ const added = ref(false);
 
 const handleAddToCart = () => {
   if (!product.value) return;
+  if (!authStore.isAuthenticated) {
+    return navigateTo('/auth/login');
+  }  
   cartStore.addItem(product.value, quantity.value);
   added.value = true;
   setTimeout(() => (added.value = false), 1500);

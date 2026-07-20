@@ -1,7 +1,7 @@
 <template>
   <div>
-    <h1 class="text-2xl font-semibold mb-1">Content de vous revoir</h1>
-    <p class="text-ink/60 text-sm mb-6">Connectez-vous à votre compte</p>
+    <h1 class="text-2xl font-semibold mb-1 text-center">Content de vous revoir</h1>
+    <p class="text-ink/60 text-sm mb-6 text-center">Connectez-vous à votre compte</p>
 
     <button
       type="button"
@@ -79,7 +79,6 @@ const loading = ref(false);
 const errorMessage = ref('');
 
 const handleGoogleLogin = () => {
-  // Navigation complète du navigateur (pas un fetch) — nécessaire pour le flow OAuth Google
   window.location.href = `${config.public.apiBase}/auth/google`;
 };
 
@@ -92,7 +91,7 @@ const handleLogin = async () => {
     if (authStore.isAdmin) {
       router.push('/admin');
     } else {
-      router.push('/produits');
+      router.push('/');
     }
   } catch (error: any) {
     if (error.response?.status === 429) {

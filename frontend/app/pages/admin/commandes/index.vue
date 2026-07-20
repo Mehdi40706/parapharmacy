@@ -18,7 +18,7 @@
     <div class="hidden md:block bg-white rounded-2xl border border-mist overflow-x-auto">
       <table class="w-full text-sm min-w-[640px]">
         <thead class="bg-mist/50">
-          <tr class="text-left">
+          <tr class="text-center">
             <th class="p-4">Client</th>
             <th class="p-4">Articles</th>
             <th class="p-4">Total</th>
@@ -28,7 +28,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr v-for="order in orders" :key="order.id" class="border-t border-mist">
+          <tr v-for="order in orders" :key="order.id" class="border-t border-mistc text-center">
             <td class="p-4">{{ (order as any).user?.firstName }} {{ (order as any).user?.lastName }}</td>
             <td class="p-4 text-ink/60">{{ order.items.length }} article(s)</td>
             <td class="p-4 price">{{ order.totalPrice.toFixed(2) }} TND</td>

@@ -1,5 +1,6 @@
 <template>
   <div class="max-w-4xl mx-auto px-4 py-8 space-y-6">
+      <BackButton label="Retour" class="mb-6" />
     <div>
       <h1 class="text-2xl font-semibold text-ink">Mon compte</h1>
       <p class="text-sm text-ink/60">Mettez à jour vos informations personnelles et votre mot de passe.</p>
@@ -65,6 +66,7 @@
 </template>
 
 <script setup lang="ts">
+import BackButton from '~/components/common/BackButton.vue';
 import { useAccountForm } from '~/composables/useAccountForm';
 
 definePageMeta({ middleware: 'auth' });

@@ -1,8 +1,8 @@
 <template>
   <div class="min-h-screen flex flex-col bg-background">
     <header class="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-mist">
-      <nav class="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-        <NuxtLink to="/" class="font-display text-xl font-semibold text-sage-dark">
+      <nav class="max-w-7xl mx-auto px-8 lg:px-12 h-16 flex items-center justify-between">        
+        <NuxtLink to="/produits" class="font-display text-xl font-semibold text-sage-dark">
           Parapharmacie
         </NuxtLink>
 
@@ -74,37 +74,48 @@
           </template>
         </div>
 
-        <!-- Zone mobile : panier + burger -->
-        <div class="md:hidden flex items-center gap-4">
-          <NuxtLink
-            v-if="authStore.isAuthenticated"
-            to="/panier"
-            class="relative"
-            @click="mobileMenuOpen = false"
-          >
-            <Icon name="heroicons:shopping-cart" class="w-6 h-6" />
-            <span
-              v-if="cartStore.itemCount > 0"
-              class="absolute -top-2 -right-3 bg-honey text-ink text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
-            >
-              {{ cartStore.itemCount }}
-            </span>
-          </NuxtLink>
+        <!-- Mobile -->
+    <div class="md:hidden flex items-center gap-3">
 
-          <button
-            @click.stop="mobileMenuOpen = !mobileMenuOpen"
-            class="p-2 -mr-2"
-            aria-label="Ouvrir le menu"
+      <template v-if="authStore.isAuthenticated">
+        <NuxtLink
+          to="/panier"
+          class="relative"
+          @click="mobileMenuOpen = false"
+        >
+          <Icon name="heroicons:shopping-cart" class="w-6 h-6" />
+          <span
+            v-if="cartStore.itemCount > 0"
+            class="absolute -top-2 -right-3 bg-honey text-ink text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
           >
-            <Icon
-              :name="mobileMenuOpen ? 'heroicons:x-mark' : 'heroicons:bars-3'"
-              class="w-6 h-6"
-            />
-          </button>
-        </div>
-      </nav>
+            {{ cartStore.itemCount }}
+          </span>
+        </NuxtLink>
 
-     <!-- Menu mobile (drawer) -->
+        <button
+          @click.stop="mobileMenuOpen = !mobileMenuOpen"
+          class="p-2 -mr-2"
+          aria-label="Ouvrir le menu"
+        >
+          <Icon
+            :name="mobileMenuOpen ? 'heroicons:x-mark' : 'heroicons:bars-3'"
+            class="w-6 h-6"
+          />
+        </button>
+      </template>
+
+      <template v-else>
+        <NuxtLink
+          to="/auth/login"
+          class="btn-primary text-sm py-2 px-4"
+        >
+          Connexion
+        </NuxtLink>
+      </template>
+
+    </div>
+    </nav>
+    <!-- Mobile menu -->
     <Transition
       enter-active-class="transition duration-200 ease-out"
       enter-from-class="opacity-0 -translate-y-2"
@@ -114,49 +125,55 @@
       leave-to-class="opacity-0 -translate-y-2"
     >
       <div
-        v-if="mobileMenuOpen"
+        v-if="authStore.isAuthenticated && mobileMenuOpen"
         ref="mobileMenu"
         class="md:hidden absolute right-4 top-full mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-xl border border-mist bg-white shadow-xl overflow-hidden z-50 flex flex-col"
       >
-        <template v-if="authStore.isAuthenticated">
-          <div class="px-4 py-4 border-b">
-            <p class="font-semibold">
-              {{ authStore.user?.firstName }} {{ authStore.user?.lastName }}
-            </p>
-            <p class="text-sm text-gray-500">{{ authStore.user?.email }}</p>
-          </div>
-          <NuxtLink to="/compte" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50" @click="mobileMenuOpen = false">
-            <Icon name="heroicons:user-circle" class="w-5 h-5" />
-            Mon compte
-          </NuxtLink>
-          <NuxtLink to="/commandes" class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50" @click="mobileMenuOpen = false">
-            <Icon name="heroicons:shopping-bag" class="w-5 h-5" />
-            Mes commandes
-          </NuxtLink>
-          <div class="border-t"></div>
-          <button @click="handleLogout" class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50">
-            <Icon name="heroicons:arrow-right-on-rectangle" class="w-5 h-5" />
-            Déconnexion
-          </button>
-        </template>
+        <div class="px-4 py-4 border-b">
+          <p class="font-semibold">
+            {{ authStore.user?.firstName }} {{ authStore.user?.lastName }}
+          </p>
+          <p class="text-sm text-gray-500">
+            {{ authStore.user?.email }}
+          </p>
+        </div>
 
-        <template v-else>
-          <div class="p-3">
-            <NuxtLink
-              to="/auth/login"
-              class="btn-primary text-sm py-2 text-center block"
-              @click="mobileMenuOpen = false"
-            >
-              Connexion
-            </NuxtLink>
-          </div>
-        </template>
+        <NuxtLink
+          to="/compte"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
+          @click="mobileMenuOpen = false"
+        >
+          <Icon name="heroicons:user-circle" class="w-5 h-5" />
+          Mon compte
+        </NuxtLink>
+
+        <NuxtLink
+          to="/commandes"
+          class="flex items-center gap-3 px-4 py-3 hover:bg-gray-50"
+          @click="mobileMenuOpen = false"
+        >
+          <Icon name="heroicons:shopping-bag" class="w-5 h-5" />
+          Mes commandes
+        </NuxtLink>
+
+        <div class="border-t"></div>
+
+        <button
+          @click="handleLogout"
+          class="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50"
+        >
+          <Icon
+            name="heroicons:arrow-right-on-rectangle"
+            class="w-5 h-5"
+          />
+          Déconnexion
+        </button>
       </div>
     </Transition>
     </header>
 
-    <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-10">
-  <slot />
+    <main class="flex-1 max-w-7xl mx-auto w-full px-8 lg:px-12 py-6 sm:py-10">
+    <slot />
 </main>
 
   <ChatWidget />

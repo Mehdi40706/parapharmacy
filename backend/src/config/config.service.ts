@@ -30,7 +30,7 @@ export class ConfigService {
 	}
 
 	getMailFrom(): string {
-		return process.env.MAIL_FROM ?? this.getMailUser();
+	return process.env.MAIL_FROM ?? 'onboarding@resend.dev'; // adapte une fois ton domaine vérifié
 	}
 
 	getFrontendUrl(): string {
@@ -44,6 +44,21 @@ export class ConfigService {
 	getGroqApiKey(): string {
     return this.getRequired('GROQ_API_KEY');
 }
+
+	getResendApiKey(): string {
+	return this.getRequired('RESEND_API_KEY');
+	}
+
+	getAdminEmail(): string {
+  	return this.getRequired('ADMIN_EMAIL');
+	}
+
+	getLowStockThreshold(): number {
+	const value = process.env.LOW_STOCK_THRESHOLD;
+	return value ? parseInt(value, 10) : 5; 
+	}
+
+	
 
 	private getRequired(key: string): string {
 		const value = process.env[key];
