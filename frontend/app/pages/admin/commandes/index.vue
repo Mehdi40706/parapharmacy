@@ -90,12 +90,14 @@
         </div>
       </div>
     </div>
+    <PageLoader :show="loading && orders.length === 0" label="Chargement des commandes..." />
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: 'admin' });
+definePageMeta({ layout: 'admin' });
 
+import PageLoader from '~/components/common/PageLoader.vue';
 import type { Order } from '~/types/order';
 
 const { fetchAllOrders, updateOrderStatus } = useAdminOrders();
@@ -111,10 +113,14 @@ const statusFilters = [
   { label: 'Livrées', value: 'DELIVERED' },
   { label: 'Annulées', value: 'CANCELLED' },
 ];
+const loading = ref(true);
 
 const load = async () => {
+  loading.value=true;
   const result = await fetchAllOrders({ status: activeFilter.value });
   orders.value = result.data;
+  loading.value=false;
+
 };
 
 const setFilter = (value: string | undefined) => {

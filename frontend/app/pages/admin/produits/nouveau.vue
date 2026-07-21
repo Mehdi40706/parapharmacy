@@ -18,7 +18,7 @@
 import { useToast } from '~/composables/useToast.js';
 import ProductForm from '../ProductForm.vue';
 
-definePageMeta({ layout: 'admin', middleware: 'admin' });
+definePageMeta({ layout: 'admin' });
 
 const { createProduct } = useAdminProducts();
 const router = useRouter();

@@ -152,16 +152,20 @@
       Cette action est irréversible. Voulez-vous vraiment supprimer
       <span class="font-medium text-ink">{{ userToDelete?.firstName }} {{ userToDelete?.lastName }}</span> ?
     </ConfirmModal>
+
+    <PageLoader :show="loading && users.length === 0" label="Chargement des utilisateurs..." />
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: 'admin' });
+definePageMeta({ layout: 'admin' });
 
 import { useDebounceFn } from '@vueuse/core';
 import ActionsMenu from '~/components/common/ActionsMenu.vue';
 import ActionsMenuItem from '~/components/common/ActionsMenuItem.vue';
 import ConfirmModal from '~/components/common/ConfirmModal.vue';
+import PageLoader from '~/components/common/PageLoader.vue';
+import { getApiErrorMessage } from '~/composables/useApi';
 import type { User } from '~/types/user';
 
 const { fetchUsers, updateUserRole, deleteUser } = useAdminUsers();
@@ -188,14 +192,13 @@ const load = async () => {
 const debouncedSearch = useDebounceFn(load, 400);
 
 const handleRoleChange = async (id: string, role: string) => {
-  const previousRole = users.value.find((u) => u.id === id)?.role;
   try {
     await updateUserRole(id, role as 'CLIENT' | 'ADMIN');
     toast.success('Rôle mis à jour.');
     await load();
-  } catch {
-    toast.error('Échec de la mise à jour du rôle.');
-    if (previousRole) await load(); 
+  } catch (error: any) {
+    toast.error(getApiErrorMessage(error));
+    await load();
   }
 };
 
@@ -212,8 +215,8 @@ const confirmDelete = async () => {
     toast.success(`${name} a été supprimé.`);
     userToDelete.value = null;
     await load();
-  } catch {
-    toast.error(`Échec de la suppression de ${name}.`);
+  } catch (error: any) {
+    toast.error(getApiErrorMessage(error));
   } finally {
     deleting.value = false;
   }

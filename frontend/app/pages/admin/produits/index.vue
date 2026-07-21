@@ -44,7 +44,8 @@
               >
                 {{ product.name }}
               </button>
-            </td>            <td class="p-4 text-ink/60">{{ product.category.name }}</td>
+            </td>            
+            <td class="p-4 text-ink/60">{{ product.category.name }}</td>
             <td class="p-4 price">{{ product.price.toFixed(2) }} TND</td>
             <td class="p-4">
               <span :class="product.stock === 0 ? 'text-clay' : 'text-ink/70'">
@@ -120,7 +121,14 @@
       >
         <div class="flex justify-between items-start mb-2">
           <div>
-            <p class="font-medium">{{ product.name }}</p>
+         
+            <p class="font-medium">
+              <button
+                @click="openQuickView(product)"
+                class="font-medium text-slate-900 hover:text-sage transition-colors cursor-pointer text-left"
+              >
+                {{ product.name }}
+              </button></p>
             <p class="text-ink/60 text-xs">{{ product.category.name }}</p>
           </div>
           <div class="flex items-center gap-2">
@@ -203,11 +211,13 @@
     </ConfirmModal>
 
     <ProductQuickViewModal :product="quickViewProduct" :is-admin="true" @close="quickViewProduct = null" />
+    <PageLoader :show="loading && products.length === 0" label="Chargement des produits..." />
+
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: 'admin' });
+definePageMeta({ layout: 'admin'});
 
 import { useDebounceFn } from '@vueuse/core';
 import ConfirmModal from '~/components/common/ConfirmModal.vue';
@@ -216,6 +226,7 @@ import ActionsMenuItem from '~/components/common/ActionsMenuItem.vue';
 import { useToast } from '~/composables/useToast';
 import { getApiErrorMessage } from '~/composables/useApi';
 import type { Product } from '~/types/product';
+import PageLoader from '~/components/common/PageLoader.vue';
 
 const { fetchAllProducts } = useProducts();
 const { deleteProduct, archiveProduct, restoreProduct } = useAdminProducts();
@@ -229,7 +240,6 @@ const deleting = ref(false);
 const loading = ref(true);
 const toast = useToast();
 const search = ref('');
-
 const load = async () => {
   loading.value = true;
   try {
@@ -267,10 +277,11 @@ const askDelete = (product: Product) => {
 
 const confirmDelete = async () => {
   if (!productToDelete.value) return;
-
+  loading.value=true;
   deleting.value = true;
   try {
     await deleteProduct(productToDelete.value.id);
+
     toast.success('Produit supprimé avec succès.');
     productToDelete.value = null;
     await load();
@@ -279,6 +290,7 @@ const confirmDelete = async () => {
     productToDelete.value = null;
   } finally {
     deleting.value = false;
+    loading.value=false;
   }
 };
 

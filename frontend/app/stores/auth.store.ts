@@ -1,9 +1,20 @@
 import type { User } from "~/types/user";
 
+const isSecureContext = () => {
+  // https:// -> true, http:// (dev local) -> false
+  if (import.meta.client) return window.location.protocol === 'https:';
+  return process.env.NODE_ENV === 'production';
+};
+
+const cookieOptions = () => ({
+  sameSite: 'lax' as const,
+  secure: isSecureContext(),
+});
+
 export const useAuthStore = defineStore('auth', {
   state: () => ({
     user: null as User | null,
-    _refreshPromise: null as Promise<boolean> | null, 
+    _refreshPromise: null as Promise<boolean> | null,
   }),
 
   getters: {
@@ -15,8 +26,8 @@ export const useAuthStore = defineStore('auth', {
 
   actions: {
     setTokens(access: string, refresh: string) {
-      useCookie('access_token', { maxAge: 60 * 15, sameSite: 'lax', secure: true }).value = access;
-      useCookie('refresh_token', { maxAge: 60 * 60 * 24 * 7, sameSite: 'lax', secure: true }).value = refresh;
+      useCookie('access_token', { maxAge: 60 * 15, ...cookieOptions() }).value = access;
+      useCookie('refresh_token', { maxAge: 60 * 60 * 24 * 7, ...cookieOptions() }).value = refresh;
     },
 
     setUser(user: User) {
@@ -53,7 +64,6 @@ export const useAuthStore = defineStore('auth', {
       await this.fetchProfile(data.access_token);
     },
 
-    // Point d'entrée public : dédup toute demande de refresh concurrente
     async refreshAccessToken(): Promise<boolean> {
       if (this._refreshPromise) return this._refreshPromise;
 

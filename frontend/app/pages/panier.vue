@@ -1,5 +1,6 @@
 <template>
   <div>
+    <BackButton label="Retour" class="mb-6" />
     <h1 class="text-3xl font-semibold mb-8">Mon panier</h1>
 
     <div v-if="cartStore.isEmpty" class="text-center py-20">
@@ -82,6 +83,8 @@
 </template>
 
 <script setup lang="ts">
+import BackButton from '~/components/common/BackButton.vue';
+
 const cartStore = useCartStore();
 const authStore = useAuthStore();
 const router = useRouter();

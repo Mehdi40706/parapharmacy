@@ -54,11 +54,11 @@
         </div>
       </div>
 
-      <div v-if="recentOrders.length === 0" class="rounded-[1.25rem] border border-dashed border-mist bg-mist/30 p-6 text-sm text-ink/60">
+      <div v-if="!loading && recentOrders.length === 0" class="rounded-[1.25rem] border border-dashed border-mist bg-mist/30 p-6 text-sm text-ink/60">
         Aucune commande pour l'instant.
       </div>
 
-      <div v-else class="hidden overflow-x-auto lg:block">
+      <div v-else-if="recentOrders.length" class="hidden overflow-x-auto lg:block">
         <table class="w-full min-w-[640px] text-sm">
           <thead>
             <tr class="border-b border-mist text-left text-ink/50">
@@ -97,33 +97,45 @@
         </div>
       </div>
     </section>
+
+    <PageLoader :show="loading" label="Chargement du dashboard..." />
   </div>
 </template>
 
 <script setup lang="ts">
+import PageLoader from '~/components/common/PageLoader.vue';
 
-definePageMeta({ layout: 'admin', middleware: 'admin' });
+definePageMeta({ layout: 'admin' });
 
 const { fetchActiveProducts } = useProducts();
 const { fetchAllOrders } = useAdminOrders();
 const { fetchUsers } = useAdminUsers();
-const { fetchCategories }= useCategories();
+const { fetchCategories } = useCategories();
 
-const stats = reactive({ products: 0, orders: 0, users: 0 , categories: 0});
+const loading = ref(true);
+const toast = useToast();
+const stats = reactive({ products: 0, orders: 0, users: 0, categories: 0 });
 const recentOrders = ref<any[]>([]);
 
 onMounted(async () => {
-  const [productsRes, ordersRes, usersRes, categoriesRes] = await Promise.all([
-    fetchActiveProducts({ limit: 1 }),
-    fetchAllOrders({ limit: 5 }),
-    fetchUsers({ limit: 1 }),
-    fetchCategories()
-  ]);
+  loading.value = true;
+  try {
+    const [productsRes, ordersRes, usersRes, categoriesRes] = await Promise.all([
+      fetchActiveProducts({ limit: 1 }),
+      fetchAllOrders({ limit: 5 }),
+      fetchUsers({ limit: 1 }),
+      fetchCategories(),
+    ]);
 
-  stats.products = productsRes.meta.total;
-  stats.orders = ordersRes.meta.total;
-  stats.users = usersRes.meta.total;
-  stats.categories = categoriesRes.length;
-  recentOrders.value = ordersRes.data;
+    stats.products = productsRes.meta.total;
+    stats.orders = ordersRes.meta.total;
+    stats.users = usersRes.meta.total;
+    stats.categories = categoriesRes.length;
+    recentOrders.value = ordersRes.data;
+  } catch {
+    toast.error('Impossible de charger les statistiques.');
+  } finally {
+    loading.value = false;
+  }
 });
 </script>

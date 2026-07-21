@@ -36,7 +36,7 @@
 <script setup lang="ts">
 import ProductForm from '../../ProductForm.vue';
 
-definePageMeta({ layout: 'admin', middleware: 'admin' });
+definePageMeta({ layout: 'admin' });
 
 const route = useRoute();
 const router = useRouter();

@@ -2,22 +2,26 @@
   <div class="min-h-screen flex flex-col bg-background">
     <header class="sticky top-0 z-40 bg-background/95 backdrop-blur border-b border-mist">
       <nav class="max-w-7xl mx-auto px-8 lg:px-12 h-16 flex items-center justify-between">        
-        <NuxtLink to="/produits" class="font-display text-xl font-semibold text-sage-dark">
+        <NuxtLink to="/" class="font-display text-xl font-semibold text-sage-dark">
           Parapharmacie
         </NuxtLink>
 
         <!-- Nav desktop -->
         <div class="hidden md:flex items-center gap-12 text-sm font-medium">
           <template v-if="authStore.isAuthenticated">
-            <NuxtLink to="/panier" class="relative hover:text-sage transition-colors">
-              <Icon name="heroicons:shopping-cart" class="w-6 h-6" />
-              <span
-                v-if="cartStore.itemCount > 0"
-                class="absolute -top-2 -right-3 bg-honey text-ink text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center"
-              >
-                {{ cartStore.itemCount }}
-              </span>
-            </NuxtLink>
+          <NuxtLink
+            class="relative transition-colors hover:text-sage"
+            @click.prevent="handleCartClick"
+          >
+            <Icon name="heroicons:shopping-cart" class="w-6 h-6" />
+
+            <span
+              v-if="cartStore.itemCount > 0"
+              class="absolute -top-2 -right-3 flex h-4 w-4 items-center justify-center rounded-full bg-honey text-[10px] font-bold text-ink"
+            >
+              {{ cartStore.itemCount }}
+            </span>
+          </NuxtLink>
 
             <div ref="userMenu" class="relative">
               <button
@@ -79,10 +83,9 @@
 
       <template v-if="authStore.isAuthenticated">
         <NuxtLink
-          to="/panier"
-          class="relative"
-          @click="mobileMenuOpen = false"
-        >
+            class="relative transition-colors hover:text-sage"
+            @click.prevent="handleCartClick"
+          >
           <Icon name="heroicons:shopping-cart" class="w-6 h-6" />
           <span
             v-if="cartStore.itemCount > 0"
@@ -195,7 +198,16 @@ const mobileMenu = ref<HTMLElement | null>(null);
 
 const userMenuOpen = ref(false);
 const userMenu = ref<HTMLElement | null>(null);
+const toast = useToast();
 
+const handleCartClick = () => {
+  if (cartStore.itemCount === 0) {
+    toast.info("Votre panier est vide.");
+  }
+  else{
+  router.push("/panier");
+  }
+};
 const handleLogout = () => {
   authStore.logout();
   mobileMenuOpen.value = false;

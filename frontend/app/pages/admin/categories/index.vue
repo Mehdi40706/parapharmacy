@@ -66,13 +66,15 @@
       Cette action est irréversible. Voulez-vous vraiment supprimer
       <span class="font-medium text-ink">{{ categoryToDelete?.name }}</span> ?
     </ConfirmModal>
+    <PageLoader :show="loading && categories.length === 0" label="Chargement des commandes..." />
   </div>
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'admin', middleware: 'admin' });
+definePageMeta({ layout: 'admin'});
 
 import ConfirmModal from '~/components/common/ConfirmModal.vue';
+import PageLoader from '~/components/common/PageLoader.vue';
 import { useToast } from '~/composables/useToast';
 import type { Category } from '~/types/product';
 
@@ -86,9 +88,11 @@ const editName = ref('');
 const categoryToDelete = ref<Category | null>(null);
 const deleting = ref(false);
 const toast = useToast();
-
+const loading=ref(true);
 const load = async () => {
+  loading.value=true;
   categories.value = await fetchCategories();
+  loading.value=false;
 };
 
 const handleCreate = async () => {

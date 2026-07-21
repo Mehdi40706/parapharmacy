@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-2xl mx-auto">
+  <div class="max-w-2xl mx-auto relative">
     <BackButton label="Retour" class="mb-6" />
     <h1 class="text-3xl font-semibold mb-8">Finaliser la commande</h1>
 
@@ -186,6 +186,29 @@
         }}
       </p>
     </div>
+
+    <!-- Loader plein écran pendant le traitement de la commande -->
+    <Transition
+      enter-active-class="transition duration-200 ease-out"
+      enter-from-class="opacity-0"
+      enter-to-class="opacity-100"
+      leave-active-class="transition duration-150 ease-in"
+      leave-from-class="opacity-100"
+      leave-to-class="opacity-0"
+    >
+      <div
+        v-if="processing"
+        class="fixed inset-0 z-50 bg-background/90 backdrop-blur-sm flex items-center justify-center"
+      >
+        <div class="flex flex-col items-center gap-4 px-6 text-center">
+          <div class="w-12 h-12 border-[3px] border-sage/20 border-t-sage rounded-full animate-spin" />
+          <div>
+            <p class="font-medium text-ink">{{ processingLabel }}</p>
+            <p class="text-sm text-ink/50 mt-1">Merci de ne pas fermer cette page.</p>
+          </div>
+        </div>
+      </div>
+    </Transition>
   </div>
 </template>
 
@@ -203,7 +226,14 @@ const { initiatePayment } = usePayments();
 const router = useRouter();
 
 const processing = ref(false);
+const processingStep = ref<'creating' | 'redirecting'>('creating');
 const errorMessage = ref('');
+
+const processingLabel = computed(() =>
+  processingStep.value === 'creating'
+    ? 'Création de votre commande...'
+    : 'Redirection vers le paiement...',
+);
 
 const paymentMethod = ref<'ONLINE' | 'COD'>('ONLINE');
 
@@ -272,6 +302,7 @@ const handlePayment = async () => {
   }
 
   processing.value = true;
+  processingStep.value = 'creating';
   let createdOrder;
 
   try {
@@ -291,12 +322,14 @@ const handlePayment = async () => {
     catch (error: any) {
       errorMessage.value = error?.data?.message || 'Impossible de créer la commande';
       processing.value = false;
+      toast.error(errorMessage.value);
       return;
   }
       if (paymentMethod.value === 'COD') {
         router.push({ path: '/checkout/success', query: { order_id: createdOrder.id, method: 'COD' } });
         return;
       }
+      processingStep.value = 'redirecting';
       try {
         const { payUrl } = await initiatePayment(createdOrder.id);
         if (import.meta.client) sessionStorage.setItem('pending_order_id', createdOrder.id);
@@ -308,8 +341,4 @@ const handlePayment = async () => {
         router.push({ path: '/checkout/retry', query: { order_id: createdOrder.id } });
       }
 };
-
-
-
-
 </script>

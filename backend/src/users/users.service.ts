@@ -1,4 +1,4 @@
-import { Injectable, ConflictException } from '@nestjs/common';
+import { Injectable, ConflictException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../database/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
 
@@ -128,9 +128,39 @@ async updateRole(id: string, role: 'CLIENT' | 'ADMIN') {
   });
 }
 
-async deleteUser(id: string) {
-  return this.prisma.user.delete({
-    where: {id}
+async deleteUser(id: string, requestingUserId?: string) {
+  const user = await this.prisma.user.findUnique({
+    where: { id },
+    select: {
+      id: true,
+      role: true,
+      _count: {
+        select: {
+          orders: {
+            where: { status: { notIn: ['PENDING', 'CANCELLED'] } },
+          },
+        },
+      },
+    },
   });
+
+  if (!user) {
+    throw new NotFoundException('Utilisateur introuvable');
+  }
+
+  if (requestingUserId && requestingUserId === id) {
+    throw new BadRequestException('Vous ne pouvez pas supprimer votre propre compte');
+  }
+
+  if (user._count.orders > 0) {
+    throw new ConflictException(
+      'Impossible de supprimer un utilisateur ayant des commandes associées',
+    );
+  }
+
+  return this.prisma.$transaction([
+    this.prisma.refreshToken.deleteMany({ where: { userId: id } }),
+    this.prisma.user.delete({ where: { id } }),
+  ]);
 }
 }
