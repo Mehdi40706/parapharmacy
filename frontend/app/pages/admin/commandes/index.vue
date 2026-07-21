@@ -75,7 +75,6 @@
                       class="w-full appearance-none rounded-xl border bg-white py-2 pl-9 pr-8 text-xs font-medium shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sage/30"
                       :class="[getStatusStyle(order.status).border, getStatusStyle(order.status).text]"
                     >
-                      <option value="PENDING">En attente</option>
                       <option value="CONFIRMED">Confirmée</option>
                       <option value="SHIPPED">Expédiée</option>
                       <option value="DELIVERED">Livrée</option>
@@ -127,7 +126,6 @@
                 class="w-full appearance-none rounded-xl border bg-white py-2 pl-9 pr-8 text-xs font-medium shadow-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-sage/30"
                 :class="[getStatusStyle(order.status).border, getStatusStyle(order.status).text]"
               >
-                <option value="PENDING">En attente</option>
                 <option value="CONFIRMED">Confirmée</option>
                 <option value="SHIPPED">Expédiée</option>
                 <option value="DELIVERED">Livrée</option>
@@ -172,7 +170,6 @@ const quickViewOrder = ref<Order | null>(null);
 const quickViewProduct = ref<Product | null>(null);
 const statusFilters = [
   { label: 'Toutes', value: undefined },
-  { label: 'En attente', value: 'PENDING' },
   { label: 'Confirmées', value: 'CONFIRMED' },
   { label: 'Expédiées', value: 'SHIPPED' },
   { label: 'Livrées', value: 'DELIVERED' },

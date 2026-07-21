@@ -46,6 +46,27 @@
       </div>
     </section>
 
+    <!-- Alerte stock faible -->
+    <section v-if="lowStockProducts.length" class="rounded-[2rem] border border-clay/20 bg-clay/5 p-5 shadow-sm sm:p-6">
+      <div class="flex items-center gap-2 mb-4">
+        <Icon name="lucide:alert-triangle" class="w-5 h-5 text-clay" />
+        <h2 class="text-lg font-semibold text-ink">Stock faible</h2>
+      </div>
+      <div class="flex flex-col gap-2">
+        <NuxtLink
+          v-for="product in lowStockProducts"
+          :key="product.id"
+          to="/admin/produits"
+          class="flex items-center justify-between gap-3 bg-white rounded-xl p-3 hover:shadow-sm transition-shadow"
+        >
+          <span class="text-sm font-medium truncate">{{ product.name }}</span>
+          <span class="badge-pill bg-clay/10 text-clay text-xs shrink-0">
+            {{ product.stock }} restant{{ product.stock > 1 ? 's' : '' }}
+          </span>
+        </NuxtLink>
+      </div>
+    </section>
+
     <section class="rounded-[2rem] border border-mist bg-white p-5 shadow-sm sm:p-6">
       <div class="mb-4 flex items-center justify-between">
         <div>
@@ -70,7 +91,14 @@
           </thead>
           <tbody>
             <tr v-for="order in recentOrders" :key="order.id" class="border-b border-mist last:border-0">
-              <td class="py-3">{{ order.user?.firstName }} {{ order.user?.lastName }}</td>
+              <td class="py-3">
+                <button
+                  @click="quickViewOrder = order"
+                  class="font-medium text-ink hover:text-sage transition-colors"
+                >
+                  {{ order.user?.firstName }} {{ order.user?.lastName }}
+                </button>
+              </td>
               <td class="py-3 price">{{ Number(order.totalPrice ?? 0).toFixed(2) }} TND</td>
               <td class="py-3">
                 <OrderStatusBadge :status="order.status" />
@@ -82,7 +110,12 @@
       </div>
 
       <div v-if="recentOrders.length" class="space-y-3 lg:hidden">
-        <div v-for="order in recentOrders" :key="order.id" class="rounded-[1.25rem] border border-mist bg-mist/20 p-4">
+        <button
+          v-for="order in recentOrders"
+          :key="order.id"
+          @click="quickViewOrder = order"
+          class="w-full text-left rounded-[1.25rem] border border-mist bg-mist/20 p-4 hover:border-sage/30 transition-colors"
+        >
           <div class="flex items-start justify-between gap-3">
             <div>
               <p class="font-semibold text-ink">{{ order.user?.firstName }} {{ order.user?.lastName }}</p>
@@ -94,20 +127,34 @@
             <span class="text-ink/60">Montant</span>
             <span class="price">{{ Number(order.totalPrice ?? 0).toFixed(2) }} TND</span>
           </div>
-        </div>
+        </button>
       </div>
     </section>
 
+    <OrderQuickViewModal
+      :order="quickViewOrder"
+      @close="quickViewOrder = null"
+      @view-product="quickViewProduct = $event"
+    />
+    <ProductQuickViewModal
+      :product="quickViewProduct"
+      :is-admin="true"
+      @close="quickViewProduct = null"
+    />
     <PageLoader :show="loading" label="Chargement du dashboard..." />
   </div>
 </template>
 
 <script setup lang="ts">
 import PageLoader from '~/components/common/PageLoader.vue';
+import OrderQuickViewModal from '~/components/order/OrderQuickViewModal.vue';
+import ProductQuickViewModal from '~/components/order/ProductQuickView.vue';
+import type { Order } from '~/types/order';
+import type { Product } from '~/types/product';
 
 definePageMeta({ layout: 'admin' });
 
-const { fetchActiveProducts } = useProducts();
+const { fetchAllProducts } = useProducts();
 const { fetchAllOrders } = useAdminOrders();
 const { fetchUsers } = useAdminUsers();
 const { fetchCategories } = useCategories();
@@ -115,16 +162,20 @@ const { fetchCategories } = useCategories();
 const loading = ref(true);
 const toast = useToast();
 const stats = reactive({ products: 0, orders: 0, users: 0, categories: 0 });
-const recentOrders = ref<any[]>([]);
+const recentOrders = ref<Order[]>([]);
+const lowStockProducts = ref<{ id: string; name: string; stock: number }[]>([]);
+const quickViewOrder = ref<Order | null>(null);
+const quickViewProduct = ref<Product | null>(null);
 
 onMounted(async () => {
   loading.value = true;
   try {
-    const [productsRes, ordersRes, usersRes, categoriesRes] = await Promise.all([
-      fetchActiveProducts({ limit: 1 }),
+    const [productsRes, ordersRes, usersRes, categoriesRes, lowStockRes] = await Promise.all([
+      fetchAllProducts({ limit: 1 }),
       fetchAllOrders({ limit: 5 }),
       fetchUsers({ limit: 1 }),
       fetchCategories(),
+      fetchAllProducts({ limit: 5 }),
     ]);
 
     stats.products = productsRes.meta.total;
@@ -132,6 +183,7 @@ onMounted(async () => {
     stats.users = usersRes.meta.total;
     stats.categories = categoriesRes.length;
     recentOrders.value = ordersRes.data;
+    lowStockProducts.value = lowStockRes.data.filter((p: any) => p.stock <= 5);
   } catch {
     toast.error('Impossible de charger les statistiques.');
   } finally {

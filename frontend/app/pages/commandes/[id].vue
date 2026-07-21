@@ -92,11 +92,33 @@
           <span class="price text-lg">{{ Number(order.totalPrice).toFixed(2) }} TND</span>
         </div>
       </div>
+
+      <button
+        v-if="canCancel"
+        @click="askCancel = true"
+        :disabled="cancelling"
+        class="btn-secondary w-full flex items-center justify-center gap-2 disabled:opacity-50"
+      >
+        <Icon name="lucide:x-circle" class="w-4 h-4" />
+        {{ cancelling ? 'Annulation...' : 'Annuler la commande' }}
+      </button>
     </div>
 
     <div v-else class="text-center py-20">
       <p class="text-ink/60">Commande introuvable.</p>
     </div>
+
+    <ConfirmModal
+      :open="askCancel"
+      title="Annuler la commande ?"
+      confirm-label="Oui, annuler"
+      cancel-label="Non, garder"
+      :loading="cancelling"
+      @cancel="askCancel = false"
+      @confirm="handleCancel"
+    >
+      Cette action est irréversible. Voulez-vous vraiment annuler cette commande ?
+    </ConfirmModal>
   </div>
 </template>
 
@@ -104,13 +126,22 @@
 definePageMeta({ middleware: 'auth' });
 
 import BackButton from '~/components/common/BackButton.vue';
+import ConfirmModal from '~/components/common/ConfirmModal.vue';
+import { useToast } from '~/composables/useToast';
 import type { Order } from '~/types/order';
 
 const route = useRoute();
-const { fetchOrderById } = useOrders();
+const toast = useToast();
+const { fetchOrderById, cancelOrder } = useOrders();
 
 const order = ref<Order | null>(null);
 const loading = ref(true);
+const cancelling = ref(false);
+const askCancel = ref(false);
+
+const canCancel = computed(
+  () => order.value?.paymentMethod === 'COD' && order.value?.status === 'CONFIRMED',
+);
 
 const statusSteps = [
   { value: 'CONFIRMED', label: 'Confirmée' },
@@ -131,9 +162,23 @@ const progressWidth = computed(() => {
   if (!order.value || order.value.status === 'CANCELLED') return 0;
   const currentIndex = stepOrder.indexOf(order.value.status);
   if (currentIndex < 0) return 0;
-  // Position du centre de l'étape courante dans la barre (0%, 50%, 100% pour 3 étapes)
   return (currentIndex / (stepOrder.length - 1)) * 100;
 });
+
+const handleCancel = async () => {
+  if (!order.value) return;
+  cancelling.value = true;
+  try {
+    await cancelOrder(order.value.id);
+    order.value = await fetchOrderById(order.value.id);
+    toast.success('Commande annulée avec succès.');
+    askCancel.value = false;
+  } catch (error: any) {
+    toast.error(error?.data?.message || "Impossible d'annuler cette commande");
+  } finally {
+    cancelling.value = false;
+  }
+};
 
 onMounted(async () => {
   try {

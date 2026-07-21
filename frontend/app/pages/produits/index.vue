@@ -69,7 +69,12 @@
       </div>
     </div>
     <!-- Barre de catégories horizontale -->
-    <div class="flex gap-2 overflow-x-auto pb-2 mb-6 [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]">
+    <div
+      ref="categoryBarRef"
+      class="flex gap-2 overflow-x-auto pb-2 mb-6 cursor-grab [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none]"
+      @wheel.passive="handleCategoryBarWheel"
+      @mousedown="handleCategoryBarMouseDown"
+    >
       <button
         @click="selectCategory('')"
         class="shrink-0 px-4 py-2 rounded-pill text-sm font-medium whitespace-nowrap transition-colors border"
@@ -297,7 +302,56 @@ const categoryLoading = reactive<Record<string, boolean>>({});
 const carouselRefs = reactive<Record<string, HTMLElement | null>>({});
 const categorySectionRefs = reactive<Record<string, HTMLElement | null>>({});
 const scrollState = reactive<Record<string, { left: boolean; right: boolean }>>({});
+// --- Drag-to-scroll : barre de catégories ---
+const categoryBarRef = ref<HTMLElement | null>(null);
+let isBarDown = false;
+let barStartX = 0;
+let barScrollLeft = 0;
+let barDidDrag = false;
 
+const handleCategoryBarWheel = (event: WheelEvent) => {
+  const el = categoryBarRef.value;
+  if (!el) return;
+  if (Math.abs(event.deltaX) > Math.abs(event.deltaY)) return;
+  el.scrollLeft += event.deltaY;
+};
+
+const handleCategoryBarMouseDown = (e: MouseEvent) => {
+  const el = categoryBarRef.value;
+  if (!el) return;
+
+  isBarDown = true;
+  barDidDrag = false;
+  el.style.cursor = 'grabbing';
+  el.style.userSelect = 'none';
+  el.style.scrollBehavior = 'auto';
+
+  barStartX = e.pageX - el.offsetLeft;
+  barScrollLeft = el.scrollLeft;
+};
+
+const handleCategoryBarMouseMove = (e: MouseEvent) => {
+  if (!isBarDown) return;
+  const el = categoryBarRef.value;
+  if (!el) return;
+
+  e.preventDefault();
+  const x = e.pageX - el.offsetLeft;
+  const walk = (x - barStartX) * 1.5;
+  if (Math.abs(walk) > 5) barDidDrag = true; // seuil pour distinguer clic vs drag
+  el.scrollLeft = barScrollLeft - walk;
+};
+
+const handleCategoryBarMouseUpOrLeave = () => {
+  if (!isBarDown) return;
+  const el = categoryBarRef.value;
+  if (el) {
+    el.style.cursor = 'grab';
+    el.style.userSelect = '';
+    el.style.scrollBehavior = 'smooth';
+  }
+  isBarDown = false;
+};
 const fetchCategoryProducts = async (categoryId: string) => {
   categoryLoading[categoryId] = true;
   try {
@@ -509,6 +563,8 @@ onMounted(async () => {
   if (import.meta.client) {
     window.addEventListener('mousemove', handleMouseMove);
     window.addEventListener('mouseup', handleMouseUpOrLeave);
+    window.addEventListener('mousemove', handleCategoryBarMouseMove);
+    window.addEventListener('mouseup', handleCategoryBarMouseUpOrLeave);
   }
 });
 
@@ -516,6 +572,8 @@ onUnmounted(() => {
   if (import.meta.client) {
     window.removeEventListener('mousemove', handleMouseMove);
     window.removeEventListener('mouseup', handleMouseUpOrLeave);
+    window.removeEventListener('mousemove', handleCategoryBarMouseMove);
+    window.removeEventListener('mouseup', handleCategoryBarMouseUpOrLeave);
   }
 });
 </script>
