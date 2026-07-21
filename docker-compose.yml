@@ -6,34 +6,18 @@ services:
     container_name: parapharmacie_db
     restart: always
     environment:
-      POSTGRES_USER: postgres
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_DB: parapharmacie_db
+      POSTGRES_DB: ${POSTGRES_DB:-parapharmacie_db}
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432" # Bound locally for safety
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
       interval: 5s
       timeout: 5s
       retries: 5
-    networks:
-      - app_network
-
-  minio:
-    image: minio/minio
-    container_name: minio
-    restart: unless-stopped
-    environment:
-      MINIO_ROOT_USER: admin
-      MINIO_ROOT_PASSWORD: password123
-    command: server /data --console-address ":9001"
-    ports:
-      - "9000:9000"
-      - "9001:9001"
-    volumes:
-      - minio_data:/data
     networks:
       - app_network
 
@@ -46,23 +30,20 @@ services:
     depends_on:
       postgres:
         condition: service_healthy
-      minio:
-        condition: service_started
     environment:
-      DATABASE_URL: postgresql://postgres:${POSTGRES_PASSWORD}@postgres:5432/parapharmacie_db?schema=public
+      DATABASE_URL: postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB:-parapharmacie_db}?schema=public
       JWT_SECRET: ${JWT_SECRET}
-      MINIO_ENDPOINT: ${MINIO_INTERNAL_ENDPOINT:-minio}
-      MINIO_PUBLIC_ENDPOINT: ${MINIO_PUBLIC_ENDPOINT:-localhost}
-      MINIO_PORT: ${MINIO_PORT:-9000}
-      MINIO_USE_SSL: ${MINIO_USE_SSL:-false}
-      MINIO_ACCESS_KEY: ${MINIO_ACCESS_KEY}
-      MINIO_SECRET_KEY: ${MINIO_SECRET_KEY}
-      MINIO_BUCKET: ${MINIO_BUCKET}
+      # Cloudinary replace MinIO
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
+      # Integrations & Payments
       KONNECT_API_URL: ${KONNECT_API_URL}
       KONNECT_API_KEY: ${KONNECT_API_KEY}
       KONNECT_WALLET_ID: ${KONNECT_WALLET_ID}
       FRONTEND_URL: ${FRONTEND_URL}
       BACKEND_URL: ${BACKEND_URL}
+      # Mail & Auth
       MAIL_HOST: ${MAIL_HOST}
       MAIL_PORT: ${MAIL_PORT}
       MAIL_USER: ${MAIL_USER}
@@ -71,6 +52,7 @@ services:
       GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}     
       GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET}  
       GOOGLE_CALLBACK_URL: ${GOOGLE_CALLBACK_URL}   
+      # AI & APIs
       GEMINI_API_KEY: ${GEMINI_API_KEY}
       VOYAGE_API_KEY: ${VOYAGE_API_KEY}
       GROQ_API_KEY: ${GROQ_API_KEY}
@@ -95,24 +77,9 @@ services:
     networks:
       - app_network
 
-  pgadmin:
-    image: dpage/pgadmin4:latest
-    container_name: parapharmacie_pgadmin
-    restart: always
-    environment:
-      PGADMIN_DEFAULT_EMAIL: admin@test.com
-      PGADMIN_DEFAULT_PASSWORD: admin
-    ports:
-      - "5050:80"
-    depends_on:
-      - postgres
-    networks:
-      - app_network
-
 networks:
   app_network:
     driver: bridge
 
 volumes:
   postgres_data:
-  minio_data:
