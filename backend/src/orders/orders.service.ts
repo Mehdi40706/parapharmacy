@@ -234,8 +234,8 @@ async findAllForUser(userId: string, query: QueryOrderDto) {
 
     if (!order) throw new NotFoundException('Commande introuvable');
     if (order.userId !== userId) throw new ForbiddenException('Accès refusé à cette commande');
-    if (order.status !== OrderStatus.PENDING) {
-      throw new BadRequestException('Seule une commande en attente peut être annulée');
+    if (order.status !== OrderStatus.CONFIRMED) {
+      throw new BadRequestException('Seule une commande confirmée peut être annulée');
     }
 
     await this.reverseStock(id, order);
