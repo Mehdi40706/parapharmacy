@@ -148,11 +148,9 @@ const expandedOrders = ref<Set<string>>(new Set());
 
 const statusFilters = [
   { label: 'Toutes', value: undefined },
-  { label: 'En attente', value: 'PENDING' },
   { label: 'Confirmées', value: 'CONFIRMED' },
   { label: 'Expédiées', value: 'SHIPPED' },
   { label: 'Livrées', value: 'DELIVERED' },
-  { label: 'Annulées', value: 'CANCELLED' },
 ];
 
 const load = async () => {

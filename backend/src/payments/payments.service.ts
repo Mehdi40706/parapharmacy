@@ -20,10 +20,6 @@ export class PaymentsService {
     private productsService: ProductsService,
     private mailService: MailService
   ) {
-     console.log('--- PaymentsService init ---');
-  console.log('KONNECT_API_URL:', process.env.KONNECT_API_URL);
-  console.log('KONNECT_API_KEY:', process.env.KONNECT_API_KEY);
-  console.log('KONNECT_WALLET_ID:', process.env.KONNECT_WALLET_ID);
     this.konnect = axios.create({
       baseURL: process.env.KONNECT_API_URL,
       headers: {

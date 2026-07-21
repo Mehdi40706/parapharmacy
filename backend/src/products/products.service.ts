@@ -380,14 +380,8 @@ private async generateUniqueSlug(name: string, excludeId?: string): Promise<stri
     const vectorLiteral = `[${queryEmbedding.join(',')}]`;
     const oversampleLimit = limit * 4;
     const rows = await this.prisma.$queryRawUnsafe<
-      {
-        id: string;
-        name: string;
-        price: number;
-        slug: string;
-        description: string | null;
-        distance: number;
-      }[]
+     { id: string; name: string; price: string; description: string | null; slug: string; imageUrl: string | null; distance: number }[]
+
     >(
       `
       SELECT
@@ -396,6 +390,7 @@ private async generateUniqueSlug(name: string, excludeId?: string): Promise<stri
         price,
         description,
         slug,
+        "imageUrl",
         (embedding <=> $1::vector) AS distance
       FROM "Product"
       WHERE embedding IS NOT NULL

@@ -4,31 +4,54 @@ import { ConfigService } from '../config/config.service';
 import Groq from 'groq-sdk';
 import { z } from 'zod';
 
-const SYSTEM_PROMPT = `Tu es l'assistant virtuel d'une parapharmacie en ligne en Tunisie.
-Ton rôle est d'aider les clients à trouver les produits adaptés à leurs besoins (peau, cheveux, douleurs, compléments, hygiène, etc.).
+const SYSTEM_PROMPT = `Tu es l'assistant virtuel d'une parapharmacie en ligne basée en Tunisie, qui vend et livre exclusivement en Tunisie.
+Ton rôle est d'aider les clients tunisiens à trouver les produits adaptés à leurs besoins (peau, cheveux, douleurs, compléments, hygiène, etc.).
+
+Règles impératives sur le contexte tunisien :
+- Tous les prix sont exprimés en dinar tunisien (TND). N'utilise JAMAIS d'autre devise (€, $, MAD, etc.), même si le client mentionne un montant dans une autre monnaie — reste toujours en TND.
+- Le client est en Tunisie : adapte tes conseils en conséquence (climat, disponibilité locale), sans faire d'hypothèse sur une livraison hors de Tunisie.
+- Parle en français, dans un registre naturel et chaleureux, sans formalisme excessif.
 
 Règles impératives pour l'utilisation des outils :
-- Avant de chercher, évalue si la demande du client est assez précise pour lancer une recherche utile.
-  Une demande est TROP VAGUE si elle ne précise ni la zone du corps/type de peau ou cheveux concernée,
-  ni le symptôme ou l'objectif recherché (ex: "j'ai mal", "je veux une crème", "un truc pour mes cheveux").
-- Si la demande est trop vague, NE PAS appeler d'outil : pose 1 ou 2 questions ciblées pour préciser le besoin
-  (ex: zone concernée, type de peau, symptôme, allergie éventuelle) avant de chercher.
-- Si la demande est déjà précise (ex: "crème hydratante pour peau sèche visage", "shampoing anti-pelliculaire"),
-  utilise directement l'outil "search_products" avec un objet JSON valide contenant "query".
+- D'abord, évalue si la demande relève du domaine de la parapharmacie (soin de la peau, cheveux, hygiène,
+  douleurs, compléments alimentaires, bien-être, produits de santé courants, etc.).
+- Si la demande est HORS SUJET (n'a aucun rapport avec la parapharmacie : électronique, vêtements, nourriture,
+  questions générales sans lien avec la santé/beauté/hygiène, etc.), NE PAS appeler d'outil. Explique poliment
+  que ce n'est pas un produit que la parapharmacie propose, sans essayer de rattacher artificiellement la
+  demande à un produit du catalogue.
+- Si la demande est dans le domaine mais TROP VAGUE, NE PAS appeler d'outil. Une demande est trop vague si elle
+  ne précise ni la zone du corps/type de peau ou cheveux concernée, ni le symptôme ou l'objectif recherché
+  (ex: "j'ai mal", "je veux une crème", "un truc pour mes cheveux"). Pose 1 ou 2 questions ciblées pour préciser
+  le besoin (zone concernée, type de peau, symptôme, allergie éventuelle) avant de chercher.
+- Si la demande est dans le domaine ET assez précise (ex: "crème hydratante pour peau sèche visage", "shampoing
+  anti-pelliculaire"), utilise directement l'outil "search_products" avec un objet JSON valide contenant "query".
+- Si l'outil ne renvoie AUCUN résultat alors que la demande est légitime et dans le domaine, ne dis JAMAIS
+  simplement "je n'ai rien trouvé" de façon sèche : précise que ce produit n'est pas disponible dans le
+  catalogue actuel, mais que l'offre évolue régulièrement et que ça pourrait être disponible prochainement.
+  Ne propose JAMAIS un produit qui n'a pas été retourné par l'outil, même approximatif.
 - Ne génère JAMAIS de balises XML ou HTML comme <function> ou <tool> dans tes réponses textuelles. Laisse l'infrastructure gérer l'appel.
-- Quand tu recommandes un produit trouvé, inclus toujours son lien sous la forme markdown [Nom du produit](/produits/ID).
-- Si la recherche ne retourne aucun résultat pertinent, dis-le simplement au client plutôt que d'inventer un produit.
+- Ne répète JAMAIS le nom, le prix ou le lien des produits trouvés dans ton texte : les produits sont déjà affichés visuellement au client sous forme de fiches, juste après ton message. Contente-toi de les évoquer brièvement en une phrase de transition (ex: "Voici ce qui pourrait te convenir :"), sans détailler chaque produit un par un.
 - Reste dans un rôle de conseil général : oriente vers un médecin pour tout symptôme sérieux, ne donne jamais de diagnostic.
-- Sois concis, chaleureux, et parle en français.
+- Sois concis.
 
-Exemple de comportement attendu :
+Exemples de comportement attendu :
+
 Client : "je veux une crème"
 Toi : "Bien sûr ! Pour bien te conseiller, c'est pour quelle zone (visage, corps, mains) et quel est ton type de peau (sèche, grasse, sensible) ?"
-(→ pas d'appel d'outil ici, la demande est trop vague)
+(→ demande dans le domaine mais trop vague : pas d'appel d'outil, question de clarification)
 
 Client : "crème hydratante pour le visage, peau sèche"
-Toi : (→ appel de l'outil search_products avec query="crème hydratante visage peau sèche")`;
-// Définition de l'outil au format standard OpenAI/Groq
+Toi : (→ appel de l'outil search_products, puis réponse du type "Voici deux crèmes bien adaptées à une peau sèche :", sans redétailler les produits dans le texte)
+
+Client : "tu peux me recommander un ordinateur portable ?"
+Toi : "Ce n'est malheureusement pas un produit que nous proposons — nous sommes spécialisés en parapharmacie (soins, hygiène, bien-être). Puis-je t'aider sur autre chose dans ce domaine ?"
+(→ hors sujet : pas d'appel d'outil, pas de tentative de rattachement forcé)
+
+Client : "avez-vous du minoxidil en mousse ?"
+(→ appel de l'outil search_products, mais aucun résultat retourné)
+Toi : "Je n'ai pas ce produit précis dans le catalogue actuel, mais notre offre évolue régulièrement — n'hésite pas à revenir vérifier prochainement. Je peux aussi te proposer une alternative si tu veux."
+(→ dans le domaine, mais pas en stock : jamais d'invention, message ouvert sur l'avenir)`;
+
 const SEARCH_PRODUCTS_TOOL = {
   type: 'function' as const,
   function: {
@@ -47,16 +70,24 @@ const SEARCH_PRODUCTS_TOOL = {
   },
 };
 
-// Validation runtime des arguments renvoyés par le modèle pour cet outil
 const SearchProductsArgsSchema = z.object({
   query: z.string().trim().min(2, 'La requête est trop courte').max(300, 'La requête est trop longue'),
 });
 
 const MAX_TOOL_ITERATIONS = 4;
 const GROQ_TIMEOUT_MS = 15_000;
-const MAX_HISTORY_MESSAGES = 10; // ~5 échanges user/assistant
+const MAX_HISTORY_MESSAGES = 10;
 const MAX_DESCRIPTION_LENGTH = 200;
+const MAX_PRODUCTS_RETURNED = 6; // évite de noyer le client si plusieurs recherches ont lieu dans un même tour
 
+export interface ChatProduct {
+  id: string;
+  name: string;
+  price: number;
+  description: string | null;
+  imageUrl: string | null;
+  url: string;
+}
 
 @Injectable()
 export class ChatService {
@@ -71,20 +102,30 @@ export class ChatService {
       apiKey: this.configService.getGroqApiKey(),
     });
   }
+
   private truncateHistory(
     messages: { role: 'user' | 'assistant'; content: string }[],
   ): { role: 'user' | 'assistant'; content: string }[] {
     if (messages.length <= MAX_HISTORY_MESSAGES) {
       return messages;
     }
-    // Garde les N derniers messages — le contexte récent est ce qui compte
-    // le plus pour une conversation de type support produit.
     return messages.slice(-MAX_HISTORY_MESSAGES);
+  }
+
+  // Filet de sécurité indépendant du prompt : même si le modèle continue de
+  // générer des liens markdown [Nom](/produits/id) malgré la consigne, on les
+  // retire systématiquement du texte final. Les vraies cartes produits (avec
+  // photo) restent le seul affichage visuel des recommandations.
+  private stripProductLinks(text: string): string {
+    return text
+      .replace(/\[([^\]]+)\]\(\/produits\/[a-zA-Z0-9-]+\)/g, '')
+      .replace(/[ \t]{2,}/g, ' ')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
   }
 
   private isRetryableError(error: any): boolean {
     const status = error?.status ?? error?.response?.status;
-    // 429 = rate limit, 5xx = erreur serveur Groq, undefined = erreur réseau/timeout
     return status === 429 || (status >= 500 && status < 600) || status === undefined;
   }
 
@@ -103,19 +144,17 @@ export class ChatService {
             messages: conversation,
             tools: options.toolChoice === 'auto' ? [SEARCH_PRODUCTS_TOOL] : undefined,
             tool_choice: options.toolChoice,
-            temperature: 0.3,
+            temperature: 0.1,
             max_tokens: 600,
           },
           { timeout: GROQ_TIMEOUT_MS },
         );
       } catch (error) {
         lastError = error;
-
         if (!this.isRetryableError(error) || attempt === maxRetries) {
           throw error;
         }
-
-        const backoffMs = 500 * Math.pow(2, attempt); // 500ms, puis 1000ms
+        const backoffMs = 500 * Math.pow(2, attempt);
         this.logger.warn(
           `Appel Groq échoué (tentative ${attempt + 1}/${maxRetries + 1}), nouvelle tentative dans ${backoffMs}ms`,
         );
@@ -131,11 +170,11 @@ export class ChatService {
 
     let conversation: any[] = [
       { role: 'system', content: SYSTEM_PROMPT },
-      ...truncatedMessages.map((m) => ({
-          role: m.role,
-          content: m.content,
-        })),
+      ...truncatedMessages.map((m) => ({ role: m.role, content: m.content })),
     ];
+
+    // Accumule les produits trouvés sur tout le tour de conversation, dédupliqués par id
+    const productsById = new Map<string, ChatProduct>();
 
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
       let response: Groq.Chat.Completions.ChatCompletion;
@@ -145,6 +184,7 @@ export class ChatService {
         this.logger.error('Appel Groq échoué après tentatives de retry', error);
         return {
           reply: "Désolé, une erreur technique m'empêche de répondre pour le moment. Réessaie dans un instant.",
+          products: [],
         };
       }
 
@@ -153,19 +193,21 @@ export class ChatService {
         this.logger.error('Réponse Groq sans message exploitable', response);
         return {
           reply: "Désolé, je n'ai pas pu formuler de réponse claire. Peux-tu reformuler ta question ?",
+          products: [],
         };
       }
       conversation.push(message);
 
-      // Si le modèle ne veut pas appeler d'outil, on renvoie simplement son texte
       if (!message.tool_calls || message.tool_calls.length === 0) {
-        return { reply: message.content || '' };
+        return {
+          reply: this.stripProductLinks(message.content || ''),
+          products: Array.from(productsById.values()).slice(0, MAX_PRODUCTS_RETURNED),
+        };
       }
 
-      // Traitement des appels d'outils en parallèle, chacun protégé individuellement
       const toolResults = await Promise.all(
         message.tool_calls.map(async (toolCall) => {
-          let formattedResults: any[] = [];
+          let formattedResults: ChatProduct[] = [];
 
           if (toolCall.function.name === 'search_products') {
             try {
@@ -183,11 +225,14 @@ export class ChatService {
                   id: p.id,
                   name: p.name,
                   price: Number(p.price),
-                  description: p.description
-                    ? p.description.slice(0, MAX_DESCRIPTION_LENGTH)
-                    : null,
+                  description: p.description ? p.description.slice(0, MAX_DESCRIPTION_LENGTH) : null,
+                  imageUrl: p.imageUrl ?? null,
                   url: `/produits/${p.slug}`,
                 }));
+
+                for (const product of formattedResults) {
+                  productsById.set(product.id, product);
+                }
               }
             } catch (error) {
               this.logger.error(
@@ -198,11 +243,16 @@ export class ChatService {
             }
           }
 
+          // Le modèle ne voit pas les images, juste de quoi raisonner sur la pertinence.
+          // Un tableau vide ici est le signal explicite pour le modèle : "aucun résultat",
+          // à distinguer d'une erreur — le prompt lui dit quoi en faire dans ce cas.
           return {
             role: 'tool' as const,
             tool_call_id: toolCall.id,
             name: toolCall.function.name,
-            content: JSON.stringify(formattedResults),
+            content: JSON.stringify(
+              formattedResults.map(({ id, name, price, description }) => ({ id, name, price, description })),
+            ),
           };
         }),
       );
@@ -210,19 +260,20 @@ export class ChatService {
       conversation.push(...toolResults);
     }
 
-    // La boucle s'est terminée par épuisement des itérations, pas par une réponse
-    // textuelle. Les résultats d'outils sont déjà dans `conversation` : on force
-    // une synthèse textuelle plutôt que de jeter ce travail avec un message d'échec.
     try {
       const finalResponse = await this.callGroqWithRetry(conversation, { toolChoice: 'none' });
       const finalMessage = finalResponse.choices?.[0]?.message?.content;
       return {
-        reply: finalMessage || "Désolé, je n'ai pas trouvé de produit correspondant à ta demande.",
+        reply: this.stripProductLinks(
+          finalMessage || "Désolé, je n'ai pas trouvé de produit correspondant à ta demande.",
+        ),
+        products: Array.from(productsById.values()).slice(0, MAX_PRODUCTS_RETURNED),
       };
     } catch (error) {
       this.logger.error('Appel de synthèse finale échoué', error);
       return {
         reply: "Désolé, je n'ai pas pu formuler de réponse claire. Peux-tu reformuler ta question ?",
+        products: [],
       };
     }
   }

@@ -16,6 +16,8 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 interface _GlobalComponents {
   ChatInput: typeof import("../../app/components/chat/ChatInput.vue")['default']
   ChatMessageBubble: typeof import("../../app/components/chat/ChatMessageBubble.vue")['default']
+  ChatProductCard: typeof import("../../app/components/chat/ChatProductCard.vue")['default']
+  ChatQuickviewModal: typeof import("../../app/components/chat/ChatQuickviewModal.vue")['default']
   ChatSuggestionChip: typeof import("../../app/components/chat/ChatSuggestionChip.vue")['default']
   ChatTypingIndicator: typeof import("../../app/components/chat/ChatTypingIndicator.vue")['default']
   ChatWidget: typeof import("../../app/components/chat/ChatWidget.vue")['default']
@@ -24,7 +26,9 @@ interface _GlobalComponents {
   CommonBackButton: typeof import("../../app/components/common/BackButton.vue")['default']
   CommonConfirmModal: typeof import("../../app/components/common/ConfirmModal.vue")['default']
   CommonPageLoader: typeof import("../../app/components/common/PageLoader.vue")['default']
+  OrderQuickViewModal: typeof import("../../app/components/order/OrderQuickViewModal.vue")['default']
   OrderStatusBadge: typeof import("../../app/components/order/OrderStatusBadge.vue")['default']
+  OrderProductQuickView: typeof import("../../app/components/order/ProductQuickView.vue")['default']
   ProductCard: typeof import("../../app/components/product/ProductCard.vue")['default']
   ProductQuickViewModal: typeof import("../../app/components/product/ProductQuickViewModal.vue")['default']
   UiFooter: typeof import("../../app/components/ui/Footer.vue")['default']
@@ -56,6 +60,8 @@ interface _GlobalComponents {
   NuxtIsland: typeof import("../../node_modules/nuxt/dist/app/components/nuxt-island")['default']
   LazyChatInput: LazyComponent<typeof import("../../app/components/chat/ChatInput.vue")['default']>
   LazyChatMessageBubble: LazyComponent<typeof import("../../app/components/chat/ChatMessageBubble.vue")['default']>
+  LazyChatProductCard: LazyComponent<typeof import("../../app/components/chat/ChatProductCard.vue")['default']>
+  LazyChatQuickviewModal: LazyComponent<typeof import("../../app/components/chat/ChatQuickviewModal.vue")['default']>
   LazyChatSuggestionChip: LazyComponent<typeof import("../../app/components/chat/ChatSuggestionChip.vue")['default']>
   LazyChatTypingIndicator: LazyComponent<typeof import("../../app/components/chat/ChatTypingIndicator.vue")['default']>
   LazyChatWidget: LazyComponent<typeof import("../../app/components/chat/ChatWidget.vue")['default']>
@@ -64,7 +70,9 @@ interface _GlobalComponents {
   LazyCommonBackButton: LazyComponent<typeof import("../../app/components/common/BackButton.vue")['default']>
   LazyCommonConfirmModal: LazyComponent<typeof import("../../app/components/common/ConfirmModal.vue")['default']>
   LazyCommonPageLoader: LazyComponent<typeof import("../../app/components/common/PageLoader.vue")['default']>
+  LazyOrderQuickViewModal: LazyComponent<typeof import("../../app/components/order/OrderQuickViewModal.vue")['default']>
   LazyOrderStatusBadge: LazyComponent<typeof import("../../app/components/order/OrderStatusBadge.vue")['default']>
+  LazyOrderProductQuickView: LazyComponent<typeof import("../../app/components/order/ProductQuickView.vue")['default']>
   LazyProductCard: LazyComponent<typeof import("../../app/components/product/ProductCard.vue")['default']>
   LazyProductQuickViewModal: LazyComponent<typeof import("../../app/components/product/ProductQuickViewModal.vue")['default']>
   LazyUiFooter: LazyComponent<typeof import("../../app/components/ui/Footer.vue")['default']>

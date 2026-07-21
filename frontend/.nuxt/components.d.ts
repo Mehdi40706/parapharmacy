@@ -16,6 +16,8 @@ type LazyComponent<T> = DefineComponent<HydrationStrategies, {}, {}, {}, {}, {},
 
 export const ChatInput: typeof import("../app/components/chat/ChatInput.vue")['default']
 export const ChatMessageBubble: typeof import("../app/components/chat/ChatMessageBubble.vue")['default']
+export const ChatProductCard: typeof import("../app/components/chat/ChatProductCard.vue")['default']
+export const ChatQuickviewModal: typeof import("../app/components/chat/ChatQuickviewModal.vue")['default']
 export const ChatSuggestionChip: typeof import("../app/components/chat/ChatSuggestionChip.vue")['default']
 export const ChatTypingIndicator: typeof import("../app/components/chat/ChatTypingIndicator.vue")['default']
 export const ChatWidget: typeof import("../app/components/chat/ChatWidget.vue")['default']
@@ -24,7 +26,9 @@ export const CommonActionsMenuItem: typeof import("../app/components/common/Acti
 export const CommonBackButton: typeof import("../app/components/common/BackButton.vue")['default']
 export const CommonConfirmModal: typeof import("../app/components/common/ConfirmModal.vue")['default']
 export const CommonPageLoader: typeof import("../app/components/common/PageLoader.vue")['default']
+export const OrderQuickViewModal: typeof import("../app/components/order/OrderQuickViewModal.vue")['default']
 export const OrderStatusBadge: typeof import("../app/components/order/OrderStatusBadge.vue")['default']
+export const OrderProductQuickView: typeof import("../app/components/order/ProductQuickView.vue")['default']
 export const ProductCard: typeof import("../app/components/product/ProductCard.vue")['default']
 export const ProductQuickViewModal: typeof import("../app/components/product/ProductQuickViewModal.vue")['default']
 export const UiFooter: typeof import("../app/components/ui/Footer.vue")['default']
@@ -56,6 +60,8 @@ export const Body: typeof import("../node_modules/nuxt/dist/head/runtime/compone
 export const NuxtIsland: typeof import("../node_modules/nuxt/dist/app/components/nuxt-island")['default']
 export const LazyChatInput: LazyComponent<typeof import("../app/components/chat/ChatInput.vue")['default']>
 export const LazyChatMessageBubble: LazyComponent<typeof import("../app/components/chat/ChatMessageBubble.vue")['default']>
+export const LazyChatProductCard: LazyComponent<typeof import("../app/components/chat/ChatProductCard.vue")['default']>
+export const LazyChatQuickviewModal: LazyComponent<typeof import("../app/components/chat/ChatQuickviewModal.vue")['default']>
 export const LazyChatSuggestionChip: LazyComponent<typeof import("../app/components/chat/ChatSuggestionChip.vue")['default']>
 export const LazyChatTypingIndicator: LazyComponent<typeof import("../app/components/chat/ChatTypingIndicator.vue")['default']>
 export const LazyChatWidget: LazyComponent<typeof import("../app/components/chat/ChatWidget.vue")['default']>
@@ -64,7 +70,9 @@ export const LazyCommonActionsMenuItem: LazyComponent<typeof import("../app/comp
 export const LazyCommonBackButton: LazyComponent<typeof import("../app/components/common/BackButton.vue")['default']>
 export const LazyCommonConfirmModal: LazyComponent<typeof import("../app/components/common/ConfirmModal.vue")['default']>
 export const LazyCommonPageLoader: LazyComponent<typeof import("../app/components/common/PageLoader.vue")['default']>
+export const LazyOrderQuickViewModal: LazyComponent<typeof import("../app/components/order/OrderQuickViewModal.vue")['default']>
 export const LazyOrderStatusBadge: LazyComponent<typeof import("../app/components/order/OrderStatusBadge.vue")['default']>
+export const LazyOrderProductQuickView: LazyComponent<typeof import("../app/components/order/ProductQuickView.vue")['default']>
 export const LazyProductCard: LazyComponent<typeof import("../app/components/product/ProductCard.vue")['default']>
 export const LazyProductQuickViewModal: LazyComponent<typeof import("../app/components/product/ProductQuickViewModal.vue")['default']>
 export const LazyUiFooter: LazyComponent<typeof import("../app/components/ui/Footer.vue")['default']>

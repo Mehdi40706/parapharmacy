@@ -1,10 +1,14 @@
 // stores/chat.ts
 import { defineStore } from 'pinia';
-import type { ChatMessage } from '~/composables/useChat';
+import type { ChatMessage, ChatProduct } from '~/composables/useChat';
+
+interface ChatMessageWithProducts extends ChatMessage {
+  products?: ChatProduct[];
+}
 
 const STORAGE_KEY = 'chat_messages';
 
-const loadFromSession = (): ChatMessage[] => {
+const loadFromSession = (): ChatMessageWithProducts[] => {
   try {
     const raw = sessionStorage.getItem(STORAGE_KEY);
     return raw ? JSON.parse(raw) : [];
@@ -13,18 +17,17 @@ const loadFromSession = (): ChatMessage[] => {
   }
 };
 
-const saveToSession = (messages: ChatMessage[]) => {
+const saveToSession = (messages: ChatMessageWithProducts[]) => {
   if (!import.meta.client) return;
   try {
     sessionStorage.setItem(STORAGE_KEY, JSON.stringify(messages));
   } catch {
-    // sessionStorage plein/indisponible — on ignore silencieusement
   }
 };
 
 export const useChatStore = defineStore('chat', {
   state: () => ({
-    messages: [] as ChatMessage[], // toujours vide au départ, cohérent SSR/client
+    messages: [] as ChatMessageWithProducts[],
     sending: false,
     error: '',
     isOpen: false,
@@ -32,7 +35,6 @@ export const useChatStore = defineStore('chat', {
   }),
 
   actions: {
-    // À appeler une seule fois, côté client uniquement, après le montage
     hydrate() {
       if (this.hydrated || !import.meta.client) return;
       this.messages = loadFromSession();
@@ -43,6 +45,7 @@ export const useChatStore = defineStore('chat', {
       this.isOpen = !this.isOpen;
     },
 
+   // stores/chat.ts — dans sendMessage()
     async sendMessage(userText: string) {
       const text = userText.trim();
       if (!text || this.sending) return;
@@ -55,8 +58,17 @@ export const useChatStore = defineStore('chat', {
       this.sending = true;
 
       try {
-        const response = await sendMessage(this.messages);
-        this.messages.push({ role: 'assistant', content: response.reply });
+        // Ne transmet que role/content au backend — jamais "products",
+        // qui est une donnée d'affichage frontend uniquement et fait
+        // échouer la validation NestJS (forbidNonWhitelisted).
+        const payload = this.messages.map(({ role, content }) => ({ role, content }));
+        const response = await sendMessage(payload);
+
+        this.messages.push({
+          role: 'assistant',
+          content: response.reply,
+          products: response.products,
+        });
         saveToSession(this.messages);
       } catch (err: any) {
         this.error = err?.data?.message || 'Une erreur est survenue, merci de réessayer.';

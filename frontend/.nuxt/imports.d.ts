@@ -39,7 +39,7 @@ export { useAdminUsers } from '../app/composables/useAdminUsers';
 export { useApi, getApiErrorMessage } from '../app/composables/useApi';
 export { useAuth, ForgotPasswordPayload, ResetPasswordPayload } from '../app/composables/useAuth';
 export { useCategories } from '../app/composables/useCategories';
-export { useChat, ChatMessage, ChatResponse } from '../app/composables/useChat';
+export { useChat, ChatMessage, ChatProduct, ChatResponse } from '../app/composables/useChat';
 export { useOrders, CreateOrderPayload } from '../app/composables/useOrders';
 export { usePayments } from '../app/composables/usePayments';
 export { useProducts, ProductQuery } from '../app/composables/useProducts';

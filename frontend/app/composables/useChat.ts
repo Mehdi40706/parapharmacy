@@ -3,8 +3,18 @@ export interface ChatMessage {
   content: string;
 }
 
+export interface ChatProduct {
+  id: string;
+  name: string;
+  price: number;
+  description: string | null;
+  imageUrl: string | null;
+  url: string;
+}
+
 export interface ChatResponse {
   reply: string;
+  products: ChatProduct[];
 }
 
 export const useChat = () => {

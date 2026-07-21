@@ -229,7 +229,7 @@ declare global {
   export type { ForgotPasswordPayload, ResetPasswordPayload } from '../../app/composables/useAuth'
   import('../../app/composables/useAuth')
   // @ts-ignore
-  export type { ChatMessage, ChatResponse } from '../../app/composables/useChat'
+  export type { ChatMessage, ChatProduct, ChatResponse } from '../../app/composables/useChat'
   import('../../app/composables/useChat')
   // @ts-ignore
   export type { CreateOrderPayload } from '../../app/composables/useOrders'

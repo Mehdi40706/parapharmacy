@@ -25,13 +25,13 @@
       </Transition>
     </button>
 
-<!-- Panneau de conversation -->
-<Transition name="panel">
-  <div
-    v-if="chatStore.isOpen"
-    class="fixed bottom-24 right-4 left-4 sm:left-auto sm:right-6 z-40 sm:w-[400px] w-auto h-[70dvh] sm:h-[620px] max-h-[calc(100dvh-7rem)] sm:max-h-[calc(100vh-8rem)] bg-white rounded-[24px] sm:rounded-[28px] border border-mist shadow-2xl flex flex-col overflow-hidden"
-    style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);"
-  >
+    <!-- Panneau de conversation -->
+    <Transition name="panel">
+      <div
+        v-if="chatStore.isOpen"
+        class="fixed bottom-24 right-4 left-4 sm:left-auto sm:right-6 z-40 sm:w-[400px] w-auto h-[70dvh] sm:h-[620px] max-h-[calc(100dvh-7rem)] sm:max-h-[calc(100vh-8rem)] bg-white rounded-[24px] sm:rounded-[28px] border border-mist shadow-2xl flex flex-col overflow-hidden"
+        style="padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom);"
+      >
         <!-- Header -->
         <div class="relative bg-gradient-to-br from-sage to-sage-dark px-4 pt-4 pb-6 shrink-0 overflow-hidden">
           <!-- Motif décoratif en arrière-plan -->
@@ -111,13 +111,25 @@
             </div>
 
             <TransitionGroup name="msg">
-              <ChatMessageBubble
-                v-for="(msg, idx) in chatStore.messages"
-                :key="idx"
-                :role="msg.role"
-                :content="msg.content"
-                @reveal="handleReveal"
-              />
+              <div v-for="(msg, idx) in chatStore.messages" :key="idx" class="flex flex-col gap-2">
+                <ChatMessageBubble
+                  :role="msg.role"
+                  :content="msg.content"
+                  @reveal="handleReveal"
+                />
+
+                <div
+                  v-if="msg.role === 'assistant' && msg.products?.length"
+                  class="flex flex-col gap-2 ml-9"
+                >
+                  <ChatProductCard
+                    v-for="product in msg.products"
+                    :key="product.id"
+                    :product="product"
+                    @quickview="quickviewProduct = $event"
+                  />
+                </div>
+              </div>
             </TransitionGroup>
 
             <ChatTypingIndicator v-if="chatStore.sending" />
@@ -144,12 +156,18 @@
         <ChatInput ref="inputRef" :disabled="chatStore.sending" @send="handleSend" />
       </div>
     </Transition>
+
+    <!-- Quickview produit -->
+    <ChatQuickviewModal :product="quickviewProduct" @close="quickviewProduct = null" />
   </div>
 </template>
 
 <script setup lang="ts">
 import { useChatStore } from '~/stores/chat.js';
 import ChatMessageBubble from './ChatMessageBubble.vue';
+import ChatProductCard from './ChatProductCard.vue';
+import ChatQuickviewModal from './ChatQuickviewModal.vue';
+import type { ChatProduct } from '~/composables/useChat';
 
 const chatStore = useChatStore();
 const widgetRoot = ref<HTMLElement | null>(null);
@@ -158,6 +176,7 @@ const inputRef = ref<InstanceType<typeof import('./ChatInput.vue').default> | nu
 const hasUnread = ref(false);
 const isNearBottom = ref(true);
 const showScrollToBottom = ref(false);
+const quickviewProduct = ref<ChatProduct | null>(null);
 
 const SCROLL_THRESHOLD_PX = 80;
 
@@ -235,9 +254,13 @@ watch(
   },
 );
 
-// Fermeture au clavier (Échap)
+// Fermeture au clavier (Échap) — ferme d'abord le quickview s'il est ouvert,
+// sinon ferme le panneau de chat
 const handleKeydown = (e: KeyboardEvent) => {
-  if (e.key === 'Escape' && chatStore.isOpen) {
+  if (e.key !== 'Escape') return;
+  if (quickviewProduct.value) {
+    quickviewProduct.value = null;
+  } else if (chatStore.isOpen) {
     chatStore.toggleOpen();
   }
 };
@@ -251,6 +274,8 @@ const handleClickOutside = (e: MouseEvent) => {
   }
 };
 
+// Conservé en filet de sécurité si jamais le modèle génère quand même un lien
+// markdown [texte](/produits/ID) malgré la consigne du prompt de ne plus le faire.
 const handleMessageClick = (e: MouseEvent) => {
   const link = (e.target as HTMLElement).closest('a');
   if (!link) return;
@@ -258,7 +283,7 @@ const handleMessageClick = (e: MouseEvent) => {
   const href = link.getAttribute('href');
   if (href && href.startsWith('/produits/')) {
     e.preventDefault();
-    navigateTo(href); 
+    navigateTo(href);
   }
 };
 

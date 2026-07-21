@@ -1,9 +1,6 @@
 <template>
   <div class="max-w-2xl mx-auto">
-    <NuxtLink to="/commandes" class="text-sm text-sage hover:underline mb-6 inline-block">
-      ← Retour à mes commandes
-    </NuxtLink>
-
+    <BackButton label="Retour" class="mb-6" />
     <div v-if="loading" class="animate-pulse space-y-4">
       <div class="h-8 bg-mist rounded w-1/2" />
       <div class="h-40 bg-mist rounded-2xl" />
@@ -21,44 +18,58 @@
       </div>
 
       <!-- Suivi de statut -->
-      <div class="bg-white rounded-2xl border border-mist p-6 mb-6">
-        <h2 class="font-medium mb-4">Suivi de la commande</h2>
-        <div class="flex items-center justify-between">
-          <div
-            v-for="(step, index) in statusSteps"
-            :key="step.value"
-            class="flex flex-col items-center flex-1 relative"
-          >
-            <div
-              class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold z-10"
-              :class="isStepDone(step.value) ? 'bg-sage text-white' : 'bg-mist text-ink/40'"
-            >
-              <svg v-if="isStepDone(step.value)" xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.5 12.75l6 6 9-13.5" />
-              </svg>
-              <span v-else>{{ index + 1 }}</span>
-            </div>
-            <span class="text-xs text-center mt-2 text-ink/60">{{ step.label }}</span>
+      <div class="bg-white rounded-2xl border border-mist p-5 sm:p-6 mb-6">
+        <h2 class="font-medium mb-6">Suivi de la commande</h2>
 
+        <div class="relative">
+          <!-- Ligne de fond -->
+          <div class="absolute top-4 left-4 right-4 h-0.5 bg-mist" />
+          <!-- Ligne de progression -->
+          <div
+            class="absolute top-4 left-4 h-0.5 bg-sage transition-all duration-500"
+            :style="{ width: `calc(${progressWidth}% - 2rem)` }"
+          />
+
+          <div class="relative flex justify-between">
             <div
-              v-if="index < statusSteps.length - 1"
-              class="absolute top-4 left-1/2 w-full h-0.5 -z-0"
-              :class="isStepDone(statusSteps[index + 1].value) ? 'bg-sage' : 'bg-mist'"
-            />
+              v-for="(step, index) in statusSteps"
+              :key="step.value"
+              class="flex flex-col items-center"
+              :style="{ width: `${100 / statusSteps.length}%` }"
+            >
+              <div
+                class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold shrink-0 transition-colors duration-300"
+                :class="isStepDone(step.value) ? 'bg-sage text-white' : 'bg-mist text-ink/40'"
+              >
+                <Icon
+                  v-if="isStepDone(step.value)"
+                  name="lucide:check"
+                  class="w-4 h-4"
+                />
+                <span v-else>{{ index + 1 }}</span>
+              </div>
+              <span
+                class="text-[11px] sm:text-xs text-center mt-2 leading-tight px-0.5"
+                :class="isStepDone(step.value) ? 'text-ink font-medium' : 'text-ink/50'"
+              >
+                {{ step.label }}
+              </span>
+            </div>
           </div>
         </div>
 
-        <p v-if="order.status === 'CANCELLED'" class="text-clay text-sm mt-4 text-center">
+        <div v-if="order.status === 'CANCELLED'" class="mt-5 flex items-center gap-2 justify-center bg-clay/10 text-clay text-sm rounded-xl py-2.5 px-4">
+          <Icon name="lucide:x-circle" class="w-4 h-4 shrink-0" />
           Cette commande a été annulée.
-        </p>
+        </div>
       </div>
 
       <!-- Articles -->
-      <div class="bg-white rounded-2xl border border-mist p-6 mb-6">
+      <div class="bg-white rounded-2xl border border-mist p-5 sm:p-6 mb-6">
         <h2 class="font-medium mb-4">Articles commandés</h2>
         <div class="flex flex-col gap-4">
-          <div v-for="item in order.items" :key="item.id" class="flex items-center gap-4">
-            <div class="w-16 h-16 bg-mist rounded-xl flex-shrink-0 overflow-hidden">
+          <div v-for="item in order.items" :key="item.id" class="flex items-center gap-3 sm:gap-4">
+            <div class="w-14 h-14 sm:w-16 sm:h-16 bg-mist rounded-xl shrink-0 overflow-hidden">
               <img
                 v-if="item.product.imageUrl"
                 :src="item.product.imageUrl"
@@ -66,30 +77,21 @@
                 class="w-full h-full object-cover"
               />
             </div>
-            <div class="flex-1">
-              <NuxtLink :to="`/produits/${item.product.slug}`" class="font-medium hover:text-sage transition-colors">
+            <div class="flex-1 min-w-0">
+              <NuxtLink :to="`/produits/${item.product.slug}`" class="font-medium hover:text-sage transition-colors block truncate">
                 {{ item.product.name }}
               </NuxtLink>
-              <p class="text-sm text-ink/60">Quantité : {{ item.quantity }} × {{ item.price.toFixed(2) }} TND</p>
+              <p class="text-sm text-ink/60">Quantité : {{ item.quantity }} × {{ Number(item.price).toFixed(2) }} TND</p>
             </div>
-            <p class="price">{{ (item.price * item.quantity).toFixed(2) }} TND</p>
+            <p class="price shrink-0">{{ (Number(item.price) * item.quantity).toFixed(2) }} TND</p>
           </div>
         </div>
 
         <div class="border-t border-mist mt-4 pt-4 flex justify-between font-medium">
           <span>Total</span>
-          <span class="price text-lg">{{ order.totalPrice.toFixed(2) }} TND</span>
+          <span class="price text-lg">{{ Number(order.totalPrice).toFixed(2) }} TND</span>
         </div>
       </div>
-
-      <button
-        v-if="order.status === 'PENDING'"
-        @click="handleCancel"
-        :disabled="cancelling"
-        class="btn-secondary w-full"
-      >
-        {{ cancelling ? 'Annulation...' : 'Annuler la commande' }}
-      </button>
     </div>
 
     <div v-else class="text-center py-20">
@@ -101,48 +103,37 @@
 <script setup lang="ts">
 definePageMeta({ middleware: 'auth' });
 
-import { useToast } from '~/composables/useToast';
+import BackButton from '~/components/common/BackButton.vue';
 import type { Order } from '~/types/order';
 
 const route = useRoute();
-const router = useRouter();
-const toast = useToast();
-const { fetchOrderById, cancelOrder } = useOrders();
+const { fetchOrderById } = useOrders();
 
 const order = ref<Order | null>(null);
 const loading = ref(true);
-const cancelling = ref(false);
 
 const statusSteps = [
-  { value: 'PENDING', label: 'Enregistrée' },
   { value: 'CONFIRMED', label: 'Confirmée' },
-  { value: 'PROCESSING', label: 'Préparation' },
   { value: 'SHIPPED', label: 'Expédiée' },
   { value: 'DELIVERED', label: 'Livrée' },
 ];
 
+const stepOrder = ['CONFIRMED', 'SHIPPED', 'DELIVERED'];
+
 const isStepDone = (stepValue: string) => {
-  if (!order.value) return false;
-  const order_ = ['PENDING', 'CONFIRMED', 'PROCESSING', 'SHIPPED', 'DELIVERED'];
-  const currentIndex = order_.indexOf(order.value.status);
-  const stepIndex = order_.indexOf(stepValue);
-  return stepIndex <= currentIndex && order.value.status !== 'CANCELLED';
+  if (!order.value || order.value.status === 'CANCELLED') return false;
+  const currentIndex = stepOrder.indexOf(order.value.status);
+  const stepIndex = stepOrder.indexOf(stepValue);
+  return stepIndex <= currentIndex;
 };
 
-const handleCancel = async () => {
-  if (!order.value || !confirm('Voulez-vous vraiment annuler cette commande ?')) return;
-
-  cancelling.value = true;
-  try {
-    await cancelOrder(order.value.id);
-    order.value = await fetchOrderById(order.value.id);
-    toast.success('Commande annulée avec succès.');
-  } catch (error: any) {
-    toast.error(error?.data?.message || "Impossible d'annuler cette commande");
-  } finally {
-    cancelling.value = false;
-  }
-};
+const progressWidth = computed(() => {
+  if (!order.value || order.value.status === 'CANCELLED') return 0;
+  const currentIndex = stepOrder.indexOf(order.value.status);
+  if (currentIndex < 0) return 0;
+  // Position du centre de l'étape courante dans la barre (0%, 50%, 100% pour 3 étapes)
+  return (currentIndex / (stepOrder.length - 1)) * 100;
+});
 
 onMounted(async () => {
   try {

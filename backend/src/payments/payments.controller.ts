@@ -23,14 +23,10 @@ export class PaymentsController {
     return this.paymentsService.createPayment(orderId, user.userId);
   }
 
-  // Appelée par Konnect lui-même (GET avec ?payment_ref=xxx)
-  // PAS de guard ici : c'est Konnect qui appelle, pas un utilisateur connecté
   @Get('webhook')
   handleWebhook(@Query('payment_ref') paymentRef: string) {
     return this.paymentsService.handleWebhook(paymentRef);
   }
-
-  // Le frontend peut appeler ceci après le retour du checkout
   @UseGuards(JwtAuthGuard)
   @Get('status/:orderId')
   getStatus(

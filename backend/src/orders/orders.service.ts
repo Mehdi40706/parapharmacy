@@ -117,32 +117,33 @@ async create(userId: string, dto: CreateOrderDto) {
 
   return order;
 }
-  async findAllForUser(userId: string, query: QueryOrderDto) {
-    const { status, page = 1, limit = 20 } = query;
+async findAllForUser(userId: string, query: QueryOrderDto) {
+  const { status, page = 1, limit = 20 } = query;
 
-    const where: Prisma.OrderWhereInput = {
-      userId,
-      ...(status && { status }),
-    };
+  const allowedStatuses: OrderStatus[] = ['CONFIRMED', 'SHIPPED', 'DELIVERED'];
 
-    const [items, total] = await Promise.all([
-      this.prisma.order.findMany({
-        where,
-        include: { items: { include: { product: true } } },
-        orderBy: { createdAt: 'desc' },
-        skip: (page - 1) * limit,
-        take: limit,
-      }),
-      this.prisma.order.count({ where }),
-    ]);
+  const where: Prisma.OrderWhereInput = {
+    userId,
+    status: status ? status : { in: allowedStatuses },
+  };
 
-    return {
-      data: items,
-      meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
-    };
-  }
+  const [items, total] = await Promise.all([
+    this.prisma.order.findMany({
+      where,
+      include: { items: { include: { product: true } } },
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    this.prisma.order.count({ where }),
+  ]);
 
-  // Pour l'admin — voit toutes les commandes, tous utilisateurs confondus
+  return {
+    data: items,
+    meta: { total, page, limit, totalPages: Math.ceil(total / limit) },
+  };
+}
+
   async findAllAdmin(query: QueryOrderDto) {
     const { status, page = 1, limit = 20 } = query;
 

@@ -1,4 +1,3 @@
-// src/chat/dto/chat.dto.ts
 import { IsArray, IsIn, IsString, ArrayMinSize, ValidateNested } from 'class-validator';
 import { Type } from 'class-transformer';
 

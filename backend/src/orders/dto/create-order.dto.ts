@@ -55,7 +55,7 @@ export class CreateOrderDto {
   items!: OrderItemDto[];
   
   @IsEnum(PaymentMethod)
-  paymentMethod:PaymentMethod;
+  paymentMethod!:PaymentMethod;
   @ValidateNested()
   @Type(() => ShippingAddressDto)
   shippingAddress!: ShippingAddressDto;
