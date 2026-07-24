@@ -30,7 +30,7 @@ export class ConfigService {
 	}
 
 	getMailFrom(): string {
-	return process.env.MAIL_FROM ?? 'onboarding@resend.dev'; // adapte une fois ton domaine vérifié
+	return process.env.MAIL_FROM ?? 'onboarding@resend.dev'; 
 	}
 
 	getFrontendUrl(): string {
