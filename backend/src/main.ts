@@ -13,13 +13,17 @@ async function bootstrap() {
       transform: true,
     }),
   );
-app.enableCors({
-  origin: true,
-  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
-  allowedHeaders: 'Content-Type, Accept, Authorization',
-  credentials: true,
-});
-app.useGlobalFilters(new PrismaExceptionFilter());
-await app.listen(5000);
+
+  app.enableCors({
+    origin: process.env.FRONTEND_URL,
+    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE,OPTIONS',
+    allowedHeaders: 'Content-Type, Accept, Authorization',
+    credentials: true,
+  });
+
+  app.useGlobalFilters(new PrismaExceptionFilter());
+
+  const port = process.env.PORT ?? 5000;
+  await app.listen(port);
 }
 bootstrap();
