@@ -118,14 +118,11 @@
         v-for="cat in categories"
         :key="cat.id"
         :ref="(el) => (categorySectionRefs[cat.id] = el as HTMLElement)"
-        v-show="!activeCategoryId || activeCategoryId === cat.id"
+        v-show="(!activeCategoryId || activeCategoryId === cat.id) && (categoryLoading[cat.id] || (categoryProducts[cat.id]?.length ?? 0) > 0)"
       >
         <h2 class="font-display font-semibold text-lg mb-3">{{ cat.name }}</h2>
         <div v-if="categoryLoading[cat.id]" class="flex gap-4 overflow-hidden">
           <div v-for="n in 4" :key="n" class="aspect-[3/4] w-[45%] sm:w-[32%] lg:w-[23%] shrink-0 bg-mist rounded-2xl animate-pulse" />
-        </div>
-        <div v-else-if="(categoryProducts[cat.id]?.length ?? 0) === 0" class="text-ink/50 text-sm py-6">
-          Aucun produit dans cette catégorie.
         </div>
         <div v-else class="relative group">
           <button
