@@ -49,4 +49,4 @@ COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
 
 EXPOSE 5000
 
-CMD npx prisma migrate deploy && node dist/src/main.js
+CMD sh -c 'echo "DB URL starts with: $(echo $DATABASE_URL | cut -c1-20)" && npx prisma migrate deploy && node dist/src/main.js'
