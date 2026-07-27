@@ -20,7 +20,7 @@ import { GoogleStrategy } from './strategies/google.strategy';
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => ({
         secret: configService.getJwtSecret(),
-        signOptions: { expiresIn: '15m' },
+        signOptions: { expiresIn: '30m' },
       }),
     }),
   ],
