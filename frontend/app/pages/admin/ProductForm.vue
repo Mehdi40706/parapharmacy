@@ -54,16 +54,16 @@
           <div v-else-if="uploadError" class="mt-3 rounded-xl bg-clay/10 px-3 py-2 text-sm text-clay">{{ uploadError }}</div>
         </div>
       </div>
-
-      <div class="lg:col-span-2">
-        <label class="mb-1.5 block text-sm font-medium text-ink">URL image (optionnel)</label>
-        <input v-model="form.imageUrl" type="text" class="input-field" placeholder="https://..." />
-      </div>
     </div>
 
     <div v-if="form.imageUrl" class="rounded-[1.25rem] border border-mist bg-mist/20 p-3">
       <p class="mb-2 text-sm font-medium text-ink">Aperçu</p>
-      <img :src="form.imageUrl" :alt="form.name || 'Image produit'" class="h-48 w-full rounded-[1rem] object-cover" @error="handleImageError" />
+      <img
+        :src="form.imageUrl"
+        :alt="form.name || 'Image produit'"
+        class="h-64 w-full rounded-[1rem] bg-white object-contain"
+        @error="handleImageError"
+      />
     </div>
 
     <p v-if="error" class="rounded-xl bg-clay/10 px-3 py-2 text-sm text-clay">{{ error }}</p>
